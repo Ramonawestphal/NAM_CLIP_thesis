@@ -1,0 +1,8 @@
+dataset: compas
+device: cpu
+seed: 42
+batch_size: 32
+epochs: 2
+lr: 0.01
+hidden_dims: [32, 32]
+output_dir: results

@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Data and artifacts
+data/compas/*.csv
+data/chestxray/**
+data/ham10000/**
+!data/*/.gitkeep
+
+docs/*.pdf
+
+results/**
+!results/.gitkeep
+
+.ipynb_checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+.DS_Store
+Thumbs.db
