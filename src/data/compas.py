@@ -32,6 +32,79 @@ def load_compas_frame(csv_path: str | os.PathLike[str]) -> pd.DataFrame:
     return df
 
 
+_COMPAS_PREPROCESS_USECOLS = (
+    "days_b_screening_arrest",
+    "is_recid",
+    "c_charge_degree",
+    "score_text",
+    "age",
+    "c_jail_in",
+    "c_jail_out",
+    "priors_count",
+    "race",
+    "sex",
+    "two_year_recid",
+)
+
+
+def load_compas(raw_path: str | os.PathLike[str], out_path: str | os.PathLike[str]) -> pd.DataFrame:
+    """Load ProPublica COMPAS CSV, apply standard filters, derive NAM features, save cleaned CSV.
+
+    Filters match ProPublica ``Compas-Analysis.ipynb`` (row count must be 6172). See
+    ``docs/preprocessing_compas.md``.
+    """
+    raw_path = Path(raw_path)
+    out_path = Path(out_path)
+
+    df = pd.read_csv(raw_path, usecols=list(_COMPAS_PREPROCESS_USECOLS))
+
+    days = pd.to_numeric(df["days_b_screening_arrest"], errors="coerce")
+    df = df.loc[days.between(-30, 30, inclusive="both")].copy()
+    df = df.loc[df["is_recid"] != -1]
+    df = df.loc[df["c_charge_degree"] != "O"]
+    df = df.loc[df["score_text"] != "N/A"]
+
+    n = len(df)
+    if n != 6172:
+        raise AssertionError(f"Expected 6172 rows after ProPublica filters, got {n}")
+
+    jail_in = pd.to_datetime(df["c_jail_in"], errors="coerce")
+    jail_out = pd.to_datetime(df["c_jail_out"], errors="coerce")
+    los = (jail_out - jail_in).dt.days
+    los = los.fillna(0).clip(lower=0)
+
+    charge_map = {"F": 1, "M": 2}
+    charge_degree = df["c_charge_degree"].map(charge_map).astype("int64")
+
+    out = pd.DataFrame(
+        {
+            "age": pd.to_numeric(df["age"], errors="coerce").astype("int64"),
+            "charge_degree": charge_degree,
+            "length_of_stay": los.astype("int64"),
+            "priors_count": pd.to_numeric(df["priors_count"], errors="coerce").astype("int64"),
+            "race": df["race"].astype(str),
+            "sex": df["sex"].astype(str),
+            "two_year_recid": pd.to_numeric(df["two_year_recid"], errors="coerce").astype("int64"),
+        }
+    )
+
+    cols = [
+        "age",
+        "charge_degree",
+        "length_of_stay",
+        "priors_count",
+        "race",
+        "sex",
+        "two_year_recid",
+    ]
+    out = out[cols]
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+
+    return out
+
+
 def compas_numeric_feature_matrix(
     df: pd.DataFrame, columns: tuple[str, ...] = COMPAS_COLUMNS
 ) -> tuple[pd.DataFrame, list[str]]:
