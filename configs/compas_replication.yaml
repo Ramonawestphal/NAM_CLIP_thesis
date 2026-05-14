@@ -1,0 +1,35 @@
+# NAM COMPAS replication — hyperparameters from docs/nam_implementation_contract.md
+
+dataset: compas
+device: cpu
+seed: 42
+
+# Sub-network architecture
+hidden_sizes: [64, 64, 32]
+dropout: 0.1
+feature_dropout: 0.05
+
+# Loss coefficients
+output_reg: 0.2078
+weight_decay: 0.0
+
+# Optimizer
+lr: 0.02082
+lr_decay: 0.995
+
+# Batching
+batch_size: 1024
+balanced_batches: true
+
+# Training schedule
+max_epochs: 1000
+early_stopping_patience: 60
+checkpoint_every: 10
+
+# Cross-validation
+n_folds: 5
+cv_seed: 42
+val_size: 0.125
+val_seed: 1337
+
+output_dir: results
