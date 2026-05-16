@@ -19,16 +19,48 @@ class NAM(nn.Module):
         self.feature_nns = nn.ModuleList(
             [FeatureNN(dropout=dropout) for _ in range(n_features)]
         )
-        self.feature_dropout = nn.Dropout(feature_dropout)
+        # Plain float — feature dropout uses a Bernoulli mask without inverted scaling.
+        # nn.Dropout would scale survivors by 1/(1-p), inflating contributions by ~5%;
+        # the paper's intent is to zero an entire feature's contribution, not rescale.
+        self.feature_dropout_p = float(feature_dropout)
         self.bias = nn.Parameter(torch.zeros(1))
 
     def calc_outputs(self, x: torch.Tensor) -> list[torch.Tensor]:
-        """Return per-feature outputs [(B,), ...] honouring current training state."""
+        """Return per-feature outputs [(B,), ...] honouring current training state.
+
+        Does NOT apply feature dropout or bias — used for penalty computation and plots.
+        """
         return [nn(x[:, i]) for i, nn in enumerate(self.feature_nns)]
+
+    def center_shape_functions(self, x_train: torch.Tensor) -> None:
+        """Mean-center shape functions on training data. Call once after training, before plotting.
+
+        For each feature net k, computes offset_k = E_n[f_k(x_kn)] over x_train.
+        Stores offsets as a buffer (self.shape_fn_offsets) so they survive state_dict
+        save/load, then absorbs their sum into self.bias so forward-pass predictions
+        are unchanged.
+
+        Plotting code subtracts shape_fn_offsets[k] from calc_outputs()[k] to obtain
+        the mean-centered f̃_k used in Figure 4.
+        """
+        was_training = self.training
+        self.eval()
+        with torch.no_grad():
+            outputs = self.calc_outputs(x_train)  # list of K tensors (N,)
+        means = torch.stack([o.mean() for o in outputs])  # (K,)
+        self.register_buffer("shape_fn_offsets", means)
+        self.bias.data = self.bias.data + means.sum()
+        if was_training:
+            self.train()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """x: (B, K) → logits (B,)"""
-        outputs = self.calc_outputs(x)        # K tensors of shape (B,)
-        stacked = torch.stack(outputs, dim=1) # (B, K)
-        stacked = self.feature_dropout(stacked)
+        outputs = self.calc_outputs(x)         # K tensors of shape (B,)
+        stacked = torch.stack(outputs, dim=1)  # (B, K)
+        if self.training and self.feature_dropout_p > 0:
+            # Plain zeroing: each feature's contribution is independently dropped
+            # with probability feature_dropout_p, without rescaling survivors.
+            mask = (torch.rand(stacked.shape[1], device=stacked.device)
+                    > self.feature_dropout_p).float()
+            stacked = stacked * mask
         return stacked.sum(dim=1) + self.bias

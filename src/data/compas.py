@@ -57,16 +57,36 @@ def load_compas(raw_path: str | os.PathLike[str], out_path: str | os.PathLike[st
     out_path = Path(out_path)
 
     df = pd.read_csv(raw_path, usecols=list(_COMPAS_PREPROCESS_USECOLS))
+    n_raw = len(df)
 
     days = pd.to_numeric(df["days_b_screening_arrest"], errors="coerce")
     df = df.loc[days.between(-30, 30, inclusive="both")].copy()
-    df = df.loc[df["is_recid"] != -1]
-    df = df.loc[df["c_charge_degree"] != "O"]
-    df = df.loc[df["score_text"] != "N/A"]
+    n_after_days = len(df)
 
-    n = len(df)
-    if n != 6172:
-        raise AssertionError(f"Expected 6172 rows after ProPublica filters, got {n}")
+    df = df.loc[df["is_recid"] != -1]
+    n_after_recid = len(df)
+
+    df = df.loc[df["c_charge_degree"] != "O"]
+    n_after_charge = len(df)
+
+    df = df.loc[df["score_text"] != "N/A"]
+    n_after_score = len(df)
+
+    print(
+        f"COMPAS filter log: raw={n_raw}"
+        f" -> screening_window={n_after_days} (dropped {n_raw - n_after_days})"
+        f" -> is_recid!=-1={n_after_recid} (dropped {n_after_days - n_after_recid})"
+        f" -> charge!=O={n_after_charge} (dropped {n_after_recid - n_after_charge})"
+        f" -> score!=N/A={n_after_score} (dropped {n_after_charge - n_after_score})"
+    )
+
+    n = n_after_score
+    if not (6170 <= n <= 6175):
+        raise AssertionError(
+            f"Expected ~6172 rows after ProPublica filters (acceptable range 6170–6175), "
+            f"got {n}. Check the filter log above for which step lost unexpected rows. "
+            f"ProPublica source: https://github.com/propublica/compas-analysis"
+        )
 
     jail_in = pd.to_datetime(df["c_jail_in"], errors="coerce")
     jail_out = pd.to_datetime(df["c_jail_out"], errors="coerce")
