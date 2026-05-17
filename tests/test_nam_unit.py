@@ -11,6 +11,8 @@ import pytest
 import torch
 import yaml
 
+from torch.utils.data import WeightedRandomSampler
+
 from src.data.encoding import CompasEncoder
 from src.nam.feature_nn import FeatureNN
 from src.nam.losses import output_penalty, total_loss
@@ -151,10 +153,10 @@ def test_encoder_column_count(cfg, compas_df):
     X = enc.fit_transform(compas_df)
     assert X.shape[1] == 12, f"Expected 12 columns, got {X.shape[1]}"
     assert enc.n_features == 12
-    # Column order: 4 continuous + 6 race OHE + 2 sex OHE
-    assert enc.feature_names_[:4] == ["age", "charge_degree", "length_of_stay", "priors_count"]
-    assert enc.feature_names_[4:10] == [f"race_{r}" for r in sorted(RACES)]
-    assert enc.feature_names_[10:] == [f"sex_{s}" for s in sorted(SEXES)]
+    # Column order: 6 race OHE + 2 sex OHE + 4 continuous (categorical-first, matching reference)
+    assert enc.feature_names_[:6] == [f"race_{r}" for r in sorted(RACES)]
+    assert enc.feature_names_[6:8] == [f"sex_{s}" for s in sorted(SEXES)]
+    assert enc.feature_names_[8:] == ["age", "charge_degree", "length_of_stay", "priors_count"]
 
 
 # ---------------------------------------------------------------------------
@@ -206,38 +208,38 @@ def test_seeding_reproducibility(cfg):
 # ---------------------------------------------------------------------------
 
 def test_encoder_column_layout(cfg, compas_df):
-    """Indices 0-3 are continuous-valued; indices 4-11 are OHE scaled to {-1, +1}."""
+    """Indices 0-7 are OHE scaled to {-1, +1}; indices 8-11 are continuous-valued."""
     enc = CompasEncoder()
     X = enc.fit_transform(compas_df)  # (N, 12)
 
-    # Continuous columns (0-3): MinMaxScaler maps to [-1, 1] but values are not
-    # restricted to just {-1, +1} (which is what OHE columns produce).
-    # charge_degree has 2 levels → maps to exactly {-1.0, 1.0}; that is fine because
-    # neither value is in {0.0, 1.0} so we can still distinguish it from raw binary.
-    for i in range(4):
-        unique_vals = set(np.unique(X[:, i]).tolist())
-        assert not unique_vals.issubset({0.0, 1.0}), (
-            f"Column {i} values {unique_vals} look like raw OHE (pre-scaling); "
-            "after joint MinMaxScaler, no column should contain only {{0.0, 1.0}}"
-        )
-
-    # OHE columns (4-11): joint MinMaxScaler maps binary {0,1} to exactly {-1.0, +1.0}
-    ohe_block = X[:, 4:]
+    # OHE columns (0-7): joint MinMaxScaler maps binary {0,1} to exactly {-1.0, +1.0}
+    ohe_block = X[:, :8]
     assert set(np.unique(ohe_block).tolist()).issubset({-1.0, 1.0}), (
-        "OHE columns (indices 4-11) must contain only -1.0 and +1.0 after joint scaling"
+        "OHE columns (indices 0-7) must contain only -1.0 and +1.0 after joint scaling"
     )
 
-    # Each row has exactly one active race indicator (cols 4-9) and one sex (cols 10-11).
+    # Each row has exactly one active race indicator (cols 0-5) and one sex (cols 6-7).
     # With {-1, +1} encoding: active=+1, inactive=-1.
     # Race sum: 1*(+1) + 5*(-1) = -4; sex sum: 1*(+1) + 1*(-1) = 0.
-    race_sums = X[:, 4:10].sum(axis=1)
-    sex_sums = X[:, 10:12].sum(axis=1)
+    race_sums = X[:, 0:6].sum(axis=1)
+    sex_sums = X[:, 6:8].sum(axis=1)
     assert np.allclose(race_sums, -4.0), (
         f"Each row must have exactly one race OHE active (expected sum -4, got {race_sums[:5]})"
     )
     assert np.allclose(sex_sums, 0.0), (
         f"Each row must have exactly one sex OHE active (expected sum 0, got {sex_sums[:5]})"
     )
+
+    # Continuous columns (8-11): MinMaxScaler maps to [-1, 1] but values are not
+    # restricted to just {-1, +1} (which is what OHE columns produce).
+    # charge_degree has 2 levels → maps to {-1.0, 1.0}; that is fine because
+    # neither value is in {0.0, 1.0} so we can distinguish it from raw binary.
+    for i in range(8, 12):
+        unique_vals = set(np.unique(X[:, i]).tolist())
+        assert not unique_vals.issubset({0.0, 1.0}), (
+            f"Column {i} values {unique_vals} look like raw OHE (pre-scaling); "
+            "after joint MinMaxScaler, no column should contain only {{0.0, 1.0}}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -432,13 +434,13 @@ def test_encoder_all_columns_in_unit_interval(cfg, compas_df):
 # ---------------------------------------------------------------------------
 
 def test_encoder_onehot_columns_are_pm_one(cfg, compas_df):
-    """OHE columns at indices 4-11 must contain only the two values {-1.0, +1.0}."""
+    """OHE columns at indices 0-7 must contain only the two values {-1.0, +1.0}."""
     enc = CompasEncoder()
     X = enc.fit_transform(compas_df)
-    ohe_block = X[:, 4:]
+    ohe_block = X[:, :8]
     unique_vals = set(np.unique(ohe_block).tolist())
     assert unique_vals == {-1.0, 1.0}, (
-        f"OHE columns (4-11) should be exactly {{-1.0, +1.0}}, got {unique_vals}"
+        f"OHE columns (0-7) should be exactly {{-1.0, +1.0}}, got {unique_vals}"
     )
 
 
@@ -447,12 +449,56 @@ def test_encoder_onehot_columns_are_pm_one(cfg, compas_df):
 # ---------------------------------------------------------------------------
 
 def test_encoder_continuous_columns_span_range(cfg, compas_df):
-    """Continuous columns at indices 0-3 must each contain at least one value < 0 and > 0."""
+    """Continuous columns at indices 8-11 must each contain at least one value < 0 and > 0."""
     enc = CompasEncoder()
     X = enc.fit_transform(compas_df)
-    # age (0), length_of_stay (2), priors_count (3) vary widely → always span both signs.
-    # charge_degree (1) has exactly 2 values → maps to {-1.0, +1.0}; skip the strict check.
-    for i in [0, 2, 3]:
+    # age (8), length_of_stay (10), priors_count (11) vary widely → always span both signs.
+    # charge_degree (9) has exactly 2 values → maps to {-1.0, +1.0}; skip the strict check.
+    for i in [8, 10, 11]:
         col = X[:, i]
         assert col.min() < 0.0, f"Continuous column {i} has no negative value (min={col.min():.4f})"
         assert col.max() > 0.0, f"Continuous column {i} has no positive value (max={col.max():.4f})"
+
+
+# ---------------------------------------------------------------------------
+# Test 18 — categorical_groups_ reflects new layout (Fix B)
+# ---------------------------------------------------------------------------
+
+def test_categorical_groups_indices_match_new_layout(cfg, compas_df):
+    """categorical_groups_ must report race at [0-5] and sex at [6-7]."""
+    enc = CompasEncoder()
+    enc.fit(compas_df)
+    assert "race" in enc.categorical_groups_, "categorical_groups_ must have 'race' key"
+    assert "sex" in enc.categorical_groups_, "categorical_groups_ must have 'sex' key"
+    assert enc.categorical_groups_["race"]["indices"] == list(range(6)), (
+        f"Race indices should be [0..5], got {enc.categorical_groups_['race']['indices']}"
+    )
+    assert enc.categorical_groups_["sex"]["indices"] == [6, 7], (
+        f"Sex indices should be [6, 7], got {enc.categorical_groups_['sex']['indices']}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 19 — balanced sampler produces ~50/50 class ratio (Fix C)
+# ---------------------------------------------------------------------------
+
+def test_balanced_sampler_returns_50_50():
+    """WeightedRandomSampler over an 80/20 dataset must realise ~50% positive rate."""
+    rng = np.random.default_rng(7)
+    n = 1000
+    # 80% negative, 20% positive
+    labels = np.array([0] * 800 + [1] * 200, dtype=int)
+    rng.shuffle(labels)
+
+    class_counts = np.bincount(labels)
+    sample_weights = torch.tensor(
+        1.0 / (2.0 * class_counts[labels]),
+        dtype=torch.float32,
+    )
+    sampler = WeightedRandomSampler(sample_weights, num_samples=10_000, replacement=True)
+
+    drawn = labels[list(sampler)]
+    positive_rate = drawn.mean()
+    assert abs(positive_rate - 0.5) < 0.03, (
+        f"Expected ~50% positives with balanced sampler, got {positive_rate:.3f}"
+    )
