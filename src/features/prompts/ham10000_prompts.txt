@@ -1,4 +1,4 @@
-﻿# HAM10000 Concept Prompts
+# HAM10000 Concept Prompts
 # Format: each concept has an ID, a short name, a tier, and 3 phrasing variants.
 # Tier 1 = ABCD rule (Stolz et al., 1994)
 # Tier 2 = 7-point checklist (Argenziano et al., 1998)
