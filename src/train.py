@@ -258,6 +258,14 @@ def run_full_cv(
     # Accumulate one ensemble prediction per sample across folds
     ensemble_probs = np.zeros(len(y_all), dtype=np.float64)
 
+    # Accumulate mean-centred shape function curves across all 100 models.
+    # Each model contributes one curve per feature evaluated on a shared grid.
+    _N_GRID = 300
+    _shape_grid = torch.linspace(-1.0, 1.0, _N_GRID)          # (N_GRID,)
+    _shape_sum = np.zeros((12, _N_GRID), dtype=np.float64)     # sum over models
+    _shape_n = 0                                               # models counted
+    _rep_encoder: CompasEncoder | None = None                  # one encoder for x-axis inverse-transform
+
     per_fold_results: list[dict] = []
 
     for fold_idx, (trval_idx, test_idx) in enumerate(skf.split(X_df, y_all)):
@@ -307,6 +315,22 @@ def run_full_cv(
             with torch.no_grad():
                 test_logits = model(X_te_enc).cpu().numpy()
             fold_test_probs += 1.0 / (1.0 + np.exp(-test_logits))
+
+            # Mean-centre on this resample's training data and accumulate curves.
+            # center_shape_functions absorbs means into the bias, keeping
+            # predictions identical while setting E[f_k(X_train)] = 0 for each k.
+            model.center_shape_functions(X_tr_enc)
+            _offsets = model.shape_fn_offsets
+            n_feat = len(model.feature_nns)
+            with torch.no_grad():
+                for k in range(n_feat):
+                    _curve = (
+                        model.feature_nns[k](_shape_grid.unsqueeze(1)) - _offsets[k]
+                    ).numpy().flatten()
+                    _shape_sum[k] += _curve
+            _shape_n += 1
+            if _rep_encoder is None:
+                _rep_encoder = encoder
 
             print(
                 f"  fold {fold_num}/{n_folds}  resample {r_idx+1:2d}/{n_resamples}"
@@ -371,6 +395,13 @@ def run_full_cv(
         "ensemble_auc_roc": ensemble_auc_roc,
         "ensemble_auc_pr": ensemble_auc_pr,
         "ensemble_probs": ensemble_probs,
+        # Averaged mean-centred shape functions across all n_folds * n_resamples models.
+        # shape_fn_mean[k, :] = E_models[f̃_k(grid)] — ready for plotting.
+        "shape_fn_grid": _shape_grid.numpy(),          # (N_GRID,) in [-1, 1]
+        "shape_fn_mean": _shape_sum / _shape_n,        # (12, N_GRID)
+        "shape_fn_n_models": _shape_n,
+        "feature_names": _rep_encoder.feature_names_,
+        "encoder": _rep_encoder,
         "config": cfg,
     }
 

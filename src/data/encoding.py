@@ -7,6 +7,12 @@ from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 CONTINUOUS_COLS = ["age", "charge_degree", "length_of_stay", "priors_count"]
 CATEGORICAL_COLS = ["race", "sex"]
 
+# Explicit category lists guarantee 12 columns even when rare categories are
+# absent from a training fold (e.g. small CV splits or unit-test fixtures).
+# Order matches sklearn's `categories="auto"` on the full COMPAS dataset.
+RACE_CATEGORIES = ["African-American", "Asian", "Caucasian", "Hispanic", "Native American", "Other"]
+SEX_CATEGORIES  = ["Female", "Male"]
+
 # Output layout (12 columns) — categorical-first, matching the reference ColumnTransformer:
 #   [0-5]  race OHE   — 6 indicators; MinMaxScaler maps {0,1} → {-1, +1}
 #   [6-7]  sex OHE    — 2 indicators; MinMaxScaler maps {0,1} → {-1, +1}
@@ -26,7 +32,7 @@ class CompasEncoder:
 
     def __init__(self) -> None:
         self._ohe = OneHotEncoder(
-            categories="auto",
+            categories=[RACE_CATEGORIES, SEX_CATEGORIES],
             sparse_output=False,
             handle_unknown="ignore",
         )
