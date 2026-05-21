@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\\\\data\\\\ham10000\" | ForEach-Object { $_.Name })",
+      "PowerShell(Import-Csv \"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\\\\data\\\\ham10000\\\\HAM10000_metadata.csv\")"
+    ]
+  }
+}
