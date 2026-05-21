@@ -11,6 +11,11 @@ Run from project root:
 from __future__ import annotations
 
 import pathlib
+import sys
+
+_ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 import numpy as np
 import pandas as pd
