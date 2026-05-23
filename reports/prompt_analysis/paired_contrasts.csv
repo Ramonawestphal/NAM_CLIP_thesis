@@ -1,0 +1,10 @@
+positive_concept,negative_concept,target_class,pos_mean,neg_mean,diff,status
+asymmetry,symmetric_uniform,mel,0.30707,0.29716,0.00991,PASS
+border_irregularity,symmetric_uniform,mel,0.26439,0.29716,-0.03276,FAIL
+colour_variation,symmetric_uniform,mel,0.28963,0.29716,-0.00752,FAIL
+atypical_pigment_network,reticular_network,mel,0.30827,0.30203,0.00624,PASS
+red_lacunae,all_others,vasc,0.32089,0.28842,0.03247,PASS
+arborizing_vessels,reticular_network,bcc,0.26897,0.29454,-0.02557,FAIL
+scaly_surface,symmetric_uniform,akiec,0.31032,0.27158,0.03874,PASS
+milia_like_cysts,atypical_pigment_network,bkl,0.28973,0.30033,-0.0106,FAIL
+p
