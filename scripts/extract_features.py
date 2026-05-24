@@ -1,8 +1,10 @@
 """Extract CLIP concept similarity scores for all HAM10000 images.
 
+Uses the v4 prompt set (ham10000_prompts_v4.txt).
+
 Outputs:
-    data/features/ham10000_concept_scores.npz   – similarity matrix + metadata
-    data/features/ham10000_image_embeddings.npy – raw image embeddings (N, 512)
+    data/features/ham10000_concept_scores_v4.npz   – similarity matrix + metadata
+    data/features/ham10000_image_embeddings.npy    – raw image embeddings (N, 512)
 
 Run from project root:
     python scripts/extract_features.py
@@ -29,14 +31,14 @@ from src.features.prompt_loader import load_prompts
 # ---------------------------------------------------------------------------
 # Paths — edit these if your data layout changes
 # ---------------------------------------------------------------------------
-METADATA_CSV   = pathlib.Path("data/ham10000/HAM10000_metadata.csv")
-IMAGE_DIRS     = [
-    pathlib.Path("data/ham10000/HAM10000_images_part_1"),
-    pathlib.Path("data/ham10000/HAM10000_images_part_2"),
+METADATA_CSV    = _ROOT / "data/ham10000/HAM10000_metadata.csv"
+IMAGE_DIRS      = [
+    _ROOT / "data/ham10000/HAM10000_images_part_1",
+    _ROOT / "data/ham10000/HAM10000_images_part_2",
 ]
-PROMPTS_FILE   = pathlib.Path("src/features/prompts/ham10000_prompts.txt")
-OUTPUT_DIR     = pathlib.Path("data/features")
-SCORES_PATH    = OUTPUT_DIR / "ham10000_concept_scores.npz"
+PROMPTS_FILE    = _ROOT / "src/features/prompts/ham10000_prompts_v4.txt"
+OUTPUT_DIR      = _ROOT / "data/features"
+SCORES_PATH     = OUTPUT_DIR / "ham10000_concept_scores_v4.npz"
 EMBEDDINGS_PATH = OUTPUT_DIR / "ham10000_image_embeddings.npy"
 # ---------------------------------------------------------------------------
 
@@ -78,6 +80,7 @@ def main() -> None:
     # 4. Prompts
     prompt_data = load_prompts(PROMPTS_FILE)
     prompts = prompt_data["prompts"]
+    print(f"Prompt file  : {PROMPTS_FILE.relative_to(_ROOT)}")
     print(f"Prompts loaded: {len(prompts)} ({len(prompt_data['concept_ids'])} concepts × 3 templates)")
 
     # 5. Encode text  →  (72, 512)

@@ -1,4 +1,6 @@
-"""Prompt quality analysis for HAM10000 CLIP concept scores.
+"""Prompt quality analysis for HAM10000 CLIP concept scores (v4 prompt set).
+
+Expects scores from scripts/extract_features.py (ham10000_concept_scores_v4.npz).
 
 Outputs (all under reports/prompt_analysis/):
     prompt_score_distributions.csv
@@ -40,9 +42,9 @@ from src.analysis.prompt_quality import (
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-SCORES_NPZ  = pathlib.Path("data/features/ham10000_concept_scores.npz")
-SPLIT_NPZ   = pathlib.Path("data/splits/train_test_lesion_split.npz")
-REPORT_DIR  = pathlib.Path("reports/prompt_analysis")
+SCORES_NPZ  = _ROOT / "data/features/ham10000_concept_scores_v4.npz"
+SPLIT_NPZ   = _ROOT / "data/splits/train_test_lesion_split.npz"
+REPORT_DIR  = _ROOT / "reports/prompt_analysis"
 # ---------------------------------------------------------------------------
 
 
@@ -78,6 +80,15 @@ def build_lesion_split(
 def main() -> None:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     SPLIT_NPZ.parent.mkdir(parents=True, exist_ok=True)
+
+    if not SCORES_NPZ.is_file():
+        raise FileNotFoundError(
+            f"Scores not found: {SCORES_NPZ.relative_to(_ROOT)}\n"
+            "Run scripts/extract_features.py first (v4 prompts)."
+        )
+
+    print("Encoder : OpenAI CLIP ViT-B/32  (NOT BiomedCLIP — use analyze_prompts_biomedclip.py for that)")
+    print(f"Scores  : {SCORES_NPZ.relative_to(_ROOT)}")
 
     # ------------------------------------------------------------------
     # Load NPZ

@@ -1,0 +1,38 @@
+==== Designed-target AUC comparison: ViT-B/32 vs BiomedCLIP (HAM10000 v4) ====
+
+Per disease group (mean AUC across concepts designed for that target):
+
+   mel    : ViT-B/32 0.520  |  BiomedCLIP 0.525  |  Δ +0.005  (n=11)
+   bcc    : ViT-B/32 0.468  |  BiomedCLIP 0.514  |  Δ +0.046  (n=3)
+   akiec  : ViT-B/32 0.456  |  BiomedCLIP 0.652  |  Δ +0.196  (n=2)
+   bkl    : ViT-B/32 0.441  |  BiomedCLIP 0.648  |  Δ +0.207  (n=3)
+   df     : ViT-B/32 0.556  |  BiomedCLIP 0.654  |  Δ +0.098  (n=1)
+   nv     : ViT-B/32 0.624  |  BiomedCLIP 0.695  |  Δ +0.070  (n=3)
+   vasc   : ViT-B/32 0.554  |  BiomedCLIP 0.814  |  Δ +0.260  (n=1)
+
+Overall mean across all 24 concepts:
+   ViT-B/32   : 0.514
+   BiomedCLIP : 0.588
+   Δ          : +0.074
+
+Malignant-only mean (mel + bcc + akiec; 16 concepts):
+   ViT-B/32   : 0.502
+   BiomedCLIP : 0.539
+   Δ          : +0.037
+
+Top 5 concepts by BiomedCLIP improvement (Δ):
+   [strawberry_pattern]  designed=akiec  ViT-B/32=0.392  BiomedCLIP=0.665  Δ=+0.274
+   [comedo_like_openings]  designed=bkl  ViT-B/32=0.385  BiomedCLIP=0.653  Δ=+0.268
+   [red_lacunae]  designed=vasc  ViT-B/32=0.554  BiomedCLIP=0.814  Δ=+0.260
+   [milia_like_cysts]  designed=bkl  ViT-B/32=0.438  BiomedCLIP=0.687  Δ=+0.249
+   [ulceration]  designed=bcc  ViT-B/32=0.463  BiomedCLIP=0.640  Δ=+0.177
+
+Top 5 concepts by BiomedCLIP regression (Δ):
+   [blue_grey_ovoid_nests]  designed=bcc  ViT-B/32=0.502  BiomedCLIP=0.405  Δ=-0.098
+   [irregular_dots_globules]  designed=mel  ViT-B/32=0.606  BiomedCLIP=0.534  Δ=-0.072
+   [atypical_vascular_pattern]  designed=mel  ViT-B/32=0.441  BiomedCLIP=0.409  Δ=-0.033
+   [colour_variation]  designed=mel  ViT-B/32=0.564  BiomedCLIP=0.534  Δ=-0.031
+   [blue_white_veil]  designed=mel  ViT-B/32=0.535  BiomedCLIP=0.513  Δ=-0.022
+
+Concepts where BiomedCLIP improves by ≥0.02 AUC on its designed target: 16 / 24
+Concepts where BiomedCLIP regresses by ≥0.02 AUC on its designed target: 5 / 24

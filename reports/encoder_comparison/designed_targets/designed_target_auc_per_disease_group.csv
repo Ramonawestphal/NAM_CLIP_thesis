@@ -1,0 +1,8 @@
+designed_target,n_concepts,vitb32_mean_auc,biomedclip_mean_auc,delta,vitb32_best_concept,biomedclip_best_concept
+vasc,1,0.5539,0.814,0.2601,red_lacunae,red_lacunae
+bkl,3,0.4408,0.6476,0.2068,cerebriform_surface,milia_like_cysts
+akiec,2,0.4564,0.6519,0.1955,scaly_surface,strawberry_pattern
+df,1,0.5563,0.6538,0.0975,central_white_patch,central_white_patch
+nv,3,0.6244,0.6946,0.0702,symmetric_uniform,healthy_skin
+bcc,3,0.4675,0.5138,0.0463,blue_grey_ovoid_nests,ulceration
+mel,11,0.5198,0.5248,0.005,irregular_dots_globules,border_irregularity
