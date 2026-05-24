@@ -2,10 +2,17 @@
 
 Each function takes numpy arrays from the training split and returns a
 pandas DataFrame. Figures are saved as side effects where noted.
+
+Re-run Analysis 3 (OvR AUC) on the v4 score matrix from the repo root::
+
+    python -m src.analysis.prompt_quality --version v4
+
+Or import :func:`run_analysis3_ovr_auc` with a custom ``scores_npz`` path.
 """
 
 from __future__ import annotations
 
+import argparse
 import pathlib
 from typing import List
 
@@ -15,7 +22,15 @@ import pandas as pd
 import seaborn as sns
 from sklearn.metrics import roc_auc_score
 
+_ROOT = pathlib.Path(__file__).resolve().parents[2]
+
 CLASSES = ["akiec", "bcc", "bkl", "df", "mel", "nv", "vasc"]
+
+# Default score bundles (written by scripts/extract_features.py / iterate_prompts.py)
+SCORES_V1_NPZ = _ROOT / "data/features/ham10000_concept_scores.npz"
+SCORES_V4_NPZ = _ROOT / "data/features/ham10000_concept_scores_v4.npz"
+DEFAULT_SPLIT_NPZ = _ROOT / "data/splits/train_test_lesion_split.npz"
+DEFAULT_REPORT_DIR = _ROOT / "reports/prompt_analysis"
 
 # Paired contrasts for analysis 5 (positive_concept, negative_concept, target_class).
 # Use "__all_others__" to compare against the mean of every other t1 prompt.
@@ -29,6 +44,93 @@ _CONTRASTS = [
     ("scaly_surface",          "symmetric_uniform",       "akiec"),
     ("milia_like_cysts",       "atypical_pigment_network","bkl"),
 ]
+
+
+def _versioned_stem(stem: str, version: str | None) -> str:
+    return f"{stem}_{version}" if version else stem
+
+
+def build_prompt_meta_from_npz(data: np.lib.npyio.NpzFile) -> pd.DataFrame:
+    """Build the 72-row prompt metadata table from an NPZ written by extract/iterate."""
+    concept_ids = list(data["concept_ids"])
+    prompts = list(data["prompts"])
+    prompt_concept_idx = data["prompt_concept_idx"]
+    prompt_template_idx = data["prompt_template_idx"]
+    tiers = data["tiers"]
+    tmpl_name = {0: "t1", 1: "t2", 2: "t3"}
+    return pd.DataFrame({
+        "prompt_idx": np.arange(len(prompts)),
+        "concept_id": [concept_ids[i] for i in prompt_concept_idx],
+        "template": [tmpl_name[i] for i in prompt_template_idx],
+        "prompt": prompts,
+        "concept_idx": list(prompt_concept_idx),
+        "tier": [int(tiers[i]) for i in prompt_concept_idx],
+    })
+
+
+def load_train_scores_and_meta(
+    scores_npz: str | pathlib.Path,
+    split_npz: str | pathlib.Path = DEFAULT_SPLIT_NPZ,
+) -> tuple[np.ndarray, np.ndarray, pd.DataFrame]:
+    """Load full score matrix and return training-split ``scores``, ``labels``, ``meta``."""
+    scores_npz = pathlib.Path(scores_npz)
+    split_npz = pathlib.Path(split_npz)
+    if not scores_npz.is_file():
+        raise FileNotFoundError(f"Scores NPZ not found: {scores_npz}")
+    if not split_npz.is_file():
+        raise FileNotFoundError(
+            f"Split NPZ not found: {split_npz}\n"
+            "Run scripts/analyze_prompts.py once to create the lesion split."
+        )
+
+    data = np.load(scores_npz, allow_pickle=True)
+    split = np.load(split_npz)
+    train_idx = split["train_idx"]
+
+    scores = data["scores"][train_idx]
+    labels = data["labels"][train_idx]
+    meta = build_prompt_meta_from_npz(data)
+    return scores, labels, meta
+
+
+def run_analysis3_ovr_auc(
+    scores_npz: str | pathlib.Path | None = None,
+    *,
+    version: str | None = "v4",
+    split_npz: str | pathlib.Path = DEFAULT_SPLIT_NPZ,
+    output_dir: str | pathlib.Path = DEFAULT_REPORT_DIR,
+) -> pd.DataFrame:
+    """Load a score NPZ, run Analysis 3 on the training split, save CSV + bar plot.
+
+    Parameters
+    ----------
+    scores_npz
+        Path to ``ham10000_concept_scores*.npz``. Defaults to v4 when
+        ``version='v4'``, else the v1 bundle.
+    version
+        Suffix for outputs (e.g. ``prompt_ovr_auc_v4.csv``). Pass ``None`` for
+        unversioned filenames (same as the original analyze_prompts run).
+    """
+    if scores_npz is None:
+        scores_npz = SCORES_V4_NPZ if version == "v4" else SCORES_V1_NPZ
+
+    output_dir = pathlib.Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    scores_train, labels_train, meta = load_train_scores_and_meta(scores_npz, split_npz)
+    print(
+        f"Analysis 3: OvR AUC on training split "
+        f"({len(scores_train):,} images, {scores_train.shape[1]} prompts)"
+    )
+    print(f"  scores: {pathlib.Path(scores_npz).relative_to(_ROOT)}")
+
+    return analysis3_ovr_auc(
+        scores_train,
+        labels_train,
+        meta,
+        output_dir,
+        version=version,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -142,8 +244,14 @@ def analysis3_ovr_auc(
     labels: np.ndarray,
     meta: pd.DataFrame,
     output_dir: pathlib.Path,
+    version: str | None = None,
 ) -> pd.DataFrame:
-    """OvR AUC for each prompt × class; saves top-20 bar plot PNG."""
+    """OvR AUC for each prompt × class; saves top-20 bar plot PNG.
+
+    When ``version`` is set (e.g. ``"v4"``), writes
+    ``prompt_ovr_auc_v4.csv`` and ``top20_prompts_auc_v4.png`` instead of
+    overwriting the v1 report files.
+    """
     rows = []
     for _, row in meta.iterrows():
         col = scores[:, row["prompt_idx"]]
@@ -191,8 +299,13 @@ def analysis3_ovr_auc(
     ax.legend(fontsize=8)
     ax.set_xlim(left=0.45)
     plt.tight_layout()
-    fig.savefig(output_dir / "top20_prompts_auc.png", dpi=150)
+    plot_stem = _versioned_stem("top20_prompts_auc", version)
+    fig.savefig(output_dir / f"{plot_stem}.png", dpi=150)
     plt.close(fig)
+
+    if version is not None:
+        csv_stem = _versioned_stem("prompt_ovr_auc", version)
+        df.to_csv(output_dir / f"{csv_stem}.csv", index=False)
 
     return df
 
@@ -278,3 +391,58 @@ def analysis5_paired_contrasts(
             "status":           status,
         })
     return pd.DataFrame(rows)
+
+
+def _cli() -> None:
+    p = argparse.ArgumentParser(
+        description="Run prompt quality Analysis 3 (per-prompt OvR AUC) on a score NPZ.",
+    )
+    p.add_argument(
+        "--version",
+        default="v4",
+        help="Output suffix and default scores file (default: v4). Use 'none' for v1 paths.",
+    )
+    p.add_argument(
+        "--scores",
+        type=pathlib.Path,
+        default=None,
+        help="Override path to ham10000_concept_scores_*.npz",
+    )
+    p.add_argument(
+        "--split",
+        type=pathlib.Path,
+        default=DEFAULT_SPLIT_NPZ,
+        help="Train/test image index split NPZ",
+    )
+    p.add_argument(
+        "--output-dir",
+        type=pathlib.Path,
+        default=DEFAULT_REPORT_DIR,
+        help="Directory for CSV and PNG outputs",
+    )
+    args = p.parse_args()
+    version = None if str(args.version).lower() in ("none", "", "v1") else args.version
+
+    df3 = run_analysis3_ovr_auc(
+        args.scores,
+        version=version,
+        split_npz=args.split,
+        output_dir=args.output_dir,
+    )
+
+    mean_auc = float(df3["auc_max"].mean())
+    csv_name = _versioned_stem("prompt_ovr_auc", version) + ".csv"
+    plot_name = _versioned_stem("top20_prompts_auc", version) + ".png"
+    print(f"\nMean auc_max: {mean_auc:.4f}")
+    print(f"Saved {args.output_dir / csv_name}")
+    print(f"Saved {args.output_dir / plot_name}")
+    print("\nTop 5 prompts by auc_max:")
+    for _, r in df3.nlargest(5, "auc_max").iterrows():
+        print(
+            f"  [{r['concept_id']} {r['template']}]  "
+            f"auc_max={r['auc_max']:.4f}  best_class={r['auc_argmax_class']}"
+        )
+
+
+if __name__ == "__main__":
+    _cli()
