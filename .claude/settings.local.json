@@ -3,7 +3,8 @@
     "allow": [
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\\\\data\\\\ham10000\" | ForEach-Object { $_.Name })",
       "PowerShell(Import-Csv \"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\\\\data\\\\ham10000\\\\HAM10000_metadata.csv\")",
-      "PowerShell([System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\\\\src\\\\features\\\\prompts\\\\ham10000_prompts.txt\"\\).Length)"
+      "PowerShell([System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\\\\src\\\\features\\\\prompts\\\\ham10000_prompts.txt\"\\).Length)",
+      "Bash(python -c \"import pathlib; print\\(pathlib.Path\\('scripts/run_concurvity_sweep.py'\\).exists\\(\\)\\)\")"
     ]
   }
 }

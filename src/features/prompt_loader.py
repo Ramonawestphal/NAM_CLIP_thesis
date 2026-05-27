@@ -47,6 +47,8 @@ def load_prompts(path: str | pathlib.Path) -> Dict:
         concept_ids.append(section)
         tiers.append(int(parser[section]["tier"]))
         for tmpl_idx, key in enumerate(("t1", "t2", "t3")):
+            if key not in parser[section]:
+                continue
             prompts.append(parser[section][key])
             prompt_concept_idx.append(concept_idx)
             prompt_template_idx.append(tmpl_idx)

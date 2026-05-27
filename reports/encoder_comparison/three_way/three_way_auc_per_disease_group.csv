@@ -1,0 +1,8 @@
+designed_target,n_concepts,vitb32_v4_mean,biomedclip_v4_mean,biomedclip_v5_mean,delta_v4_to_v5_biomedclip
+mel,11,0.5198,0.5248,0.5795,0.0547
+nv,3,0.6244,0.6946,0.706,0.0114
+bcc,3,0.4675,0.5138,0.5138,0.0
+akiec,2,0.4564,0.6519,0.6519,0.0
+bkl,3,0.4408,0.6476,0.6476,0.0
+df,1,0.5563,0.6538,0.6538,0.0
+vasc,1,0.5539,0.814,0.814,0.0

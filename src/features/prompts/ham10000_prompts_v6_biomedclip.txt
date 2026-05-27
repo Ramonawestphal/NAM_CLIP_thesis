@@ -1,0 +1,170 @@
+# HAM10000 Concept Prompts - VERSION 6 (FINAL)
+#
+# Rationale: v6 consolidates the prompt set from 3 templates per concept
+# (72 prompts) down to a single coherent prompt per concept (24 prompts).
+# This is the operative feature set for NAM training.
+#
+# Iteration history leading to v6:
+#   v1: original 3-template prompts, generic dermoscopy phrasing
+#       (e.g. "a dermoscopic image of an asymmetric skin lesion")
+#   v2: failed "melanocytic nevus" anchor under ViT-B/32 (shared lexical
+#       fragment activated on melanoma)
+#   v3: visual-descriptor framing for nv anchors (partial success)
+#   v4: final ViT-B/32 prompt set (5/8 paired contrasts)
+#   v5_biomedclip: PubMed-caption-style phrasing for melanoma + nv-anchor
+#       concepts under BiomedCLIP (mel AUC improved by +0.055)
+#   v6 (this file): all 24 concepts in a single coherent style
+#       "Dermoscopy of [target class] showing [feature]"
+#
+# Why a single template per concept:
+#   - During prompt iteration we maintained 3 templates per concept to
+#     enable template-level sensitivity analysis. That analysis is complete
+#     and reported in the appendix. For NAM training, the 72-feature matrix
+#     is over-parameterised (templates are highly correlated for most
+#     concepts; baseline NAM showed overfitting with 72 features).
+#   - Inspection of the per-prompt class-mean heatmap (Appendix Figure X)
+#     showed that for most concepts the 3 templates carry similar signal,
+#     but for a subset (ulceration, milia_like_cysts, red_lacunae,
+#     central_white_patch, blue_grey_ovoid_nests), the plain-English t3
+#     templates leaked spurious signal onto the vasc class because their
+#     generic descriptors ("open wound", "milky spots", "white centre")
+#     accidentally matched bright structureless vascular lesions.
+#   - Averaging/ensembling templates would smear these signal differences.
+#     Picking a single coherent technical template style avoids both the
+#     parameter inflation and the template-leakage problem.
+#
+# Why disease-anchored phrasing:
+#   - BiomedCLIP's PubMedBERT text encoder is pretrained on biomedical
+#     literature, where dermoscopy is conventionally described in
+#     disease-anchored captions ("Dermoscopy of melanoma showing ...").
+#   - v5_biomedclip already validated this empirically for melanoma
+#     concepts (+0.055 mean AUC on mel vs generic phrasing).
+#   - v6 extends the same convention to all 24 concepts for stylistic
+#     uniformity.
+#
+# Format: each concept has one prompt. The "t1" label is preserved for
+# backward compatibility with the prompt_loader.py interface; templates t2
+# and t3 are intentionally not provided in v6. The prompt loader should be
+# updated to handle single-template concepts without error.
+
+# ============================================================
+# TIER 1: ABCD RULE OF DERMATOSCOPY (melanoma-targeted)
+# ============================================================
+
+[asymmetry]
+tier: 1
+t1: Dermoscopy of melanoma showing an asymmetric pigmented lesion
+
+[border_irregularity]
+tier: 1
+t1: Dermoscopy of melanoma showing irregular and jagged lesion borders
+
+[colour_variation]
+tier: 1
+t1: Dermoscopy of melanoma showing variegated pigmentation with multiple colours
+
+[diameter_large]
+tier: 1
+t1: Dermoscopy of melanoma showing a large pigmented lesion greater than six millimetres
+
+# ============================================================
+# TIER 2: 7-POINT CHECKLIST (melanoma-targeted)
+# ============================================================
+
+[atypical_pigment_network]
+tier: 2
+t1: Dermoscopy of melanoma showing an atypical pigment network
+
+[blue_white_veil]
+tier: 2
+t1: Dermoscopy of melanoma showing a blue-white veil
+
+[atypical_vascular_pattern]
+tier: 2
+t1: Dermoscopy of melanoma showing atypical vascular structures
+
+[irregular_streaks]
+tier: 2
+t1: Dermoscopy of melanoma showing irregular radial streaks and pseudopods
+
+[irregular_pigmentation]
+tier: 2
+t1: Dermoscopy of melanoma showing irregular pigmented blotches
+
+[irregular_dots_globules]
+tier: 2
+t1: Dermoscopy of melanoma showing irregular dots and globules
+
+[regression_structures]
+tier: 2
+t1: Dermoscopy of melanoma showing regression structures
+
+# ============================================================
+# TIER 3: LLM-AUGMENTED CLASS-DISCRIMINATIVE CONCEPTS
+# Each concept anchored on its target disease class for stylistic
+# uniformity with the melanoma concepts above.
+# ============================================================
+
+# NV anchor (kept from v5_biomedclip t1)
+[symmetric_uniform]
+tier: 3
+t1: Dermoscopy of melanocytic nevus showing a symmetric uniformly pigmented lesion
+
+# NV anchor (kept from v5_biomedclip t1)
+[reticular_network]
+tier: 3
+t1: Dermoscopy of melanocytic nevus showing a regular reticular pigment network
+
+# BCC concepts (rewritten from v4 generic phrasing into disease-anchored form)
+[arborizing_vessels]
+tier: 3
+t1: Dermoscopy of basal cell carcinoma showing arborizing tree-like vessels
+
+[blue_grey_ovoid_nests]
+tier: 3
+t1: Dermoscopy of basal cell carcinoma showing blue-grey ovoid nests
+
+[ulceration]
+tier: 3
+t1: Dermoscopy of basal cell carcinoma showing surface ulceration
+
+# AKIEC concepts (rewritten from v4)
+[scaly_surface]
+tier: 3
+t1: Dermoscopy of actinic keratosis showing a scaly keratotic surface
+
+[strawberry_pattern]
+tier: 3
+t1: Dermoscopy of actinic keratosis showing a strawberry pattern with red pseudonetwork
+
+# BKL concepts (rewritten from v4). Disease anchor uses seborrhoeic
+# keratosis (the most common bkl subtype in HAM10000 and the conventional
+# subtype name in PubMed captions).
+[milia_like_cysts]
+tier: 3
+t1: Dermoscopy of seborrhoeic keratosis showing milia-like cysts
+
+[comedo_like_openings]
+tier: 3
+t1: Dermoscopy of seborrhoeic keratosis showing comedo-like openings
+
+[cerebriform_surface]
+tier: 3
+t1: Dermoscopy of seborrhoeic keratosis showing a cerebriform brain-like surface
+
+# DF concept (rewritten from v4)
+[central_white_patch]
+tier: 3
+t1: Dermoscopy of dermatofibroma showing a central white scar-like patch
+
+# VASC concept (rewritten from v4)
+[red_lacunae]
+tier: 3
+t1: Dermoscopy of vascular lesion showing red lacunae
+
+# Reference / negative-anchor concept. The disease anchor here is "normal
+# skin" rather than a disease class — this prompt is meant to score high
+# on lesion-free or near-normal-looking dermoscopic regions.
+[healthy_skin]
+tier: 3
+t1: Dermoscopy of normal skin showing no visible lesion
