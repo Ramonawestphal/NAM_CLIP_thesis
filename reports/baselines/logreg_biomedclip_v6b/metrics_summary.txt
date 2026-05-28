@@ -1,0 +1,60 @@
+==== Logistic Regression Baseline (BiomedCLIP v6b features, 24 ensembled, balanced) ====
+
+Aggregate metrics:
+  Balanced accuracy            : 0.5495
+  Macro F1                     : 0.4327
+  Weighted F1                  : 0.6351
+  Top-1 accuracy               : 0.5900
+  Multiclass AUC (OvR weighted): 0.8575
+
+Per-class metrics (sorted by support desc):
+       precision  recall  f1-score  support
+nv        0.9308  0.6440    0.7613     1337
+mel       0.2809  0.4174    0.3358      218
+bkl       0.3709  0.4679    0.4138      218
+bcc       0.3611  0.5200    0.4262      100
+akiec     0.2105  0.5161    0.2991       62
+vasc      0.5000  0.7812    0.6098       32
+df        0.1120  0.5000    0.1830       28
+
+Confusion matrix (row-normalised):
+       akiec   bcc   bkl    df   mel    nv  vasc
+akiec  0.516 0.177 0.129 0.097 0.065 0.000 0.016
+bcc    0.130 0.520 0.070 0.130 0.070 0.060 0.020
+bkl    0.119 0.092 0.468 0.032 0.179 0.101 0.009
+df     0.214 0.000 0.143 0.500 0.107 0.036 0.000
+mel    0.128 0.055 0.216 0.023 0.417 0.147 0.014
+nv     0.035 0.034 0.080 0.060 0.134 0.644 0.013
+vasc   0.000 0.094 0.000 0.000 0.031 0.094 0.781
+
+Per-class AUC (OvR, v6b model):
+  nv    : 0.8741
+  mel   : 0.7521
+  bkl   : 0.8003
+  bcc   : 0.9210
+  akiec : 0.8825
+  vasc  : 0.9907
+  df    : 0.8931
+
+Three-way comparison:
+  Metric                          v5 (72)  v6 (24 rewrite)  v6b (24 ensemble)
+  Balanced accuracy               0.608     0.555            0.550
+  Macro F1                        0.485     0.448            0.433
+  Multiclass AUC (OvR)            0.891     0.860            0.857
+  Top-1 accuracy                  0.636     0.595            0.590
+
+Per-class AUC delta (v6b vs v5 logreg, OvR):
+  vasc  : v6b=0.9907  v5=0.9910  (Δ -0.0003)
+  bcc   : v6b=0.9210  v5=0.9449  (Δ -0.0239)
+  df    : v6b=0.8931  v5=0.9449  (Δ -0.0518)
+  nv    : v6b=0.8741  v5=0.9059  (Δ -0.0317)
+  akiec : v6b=0.8825  v5=0.9049  (Δ -0.0224)
+  bkl   : v6b=0.8003  v5=0.8367  (Δ -0.0364)
+  mel   : v6b=0.7521  v5=0.8020  (Δ -0.0499)
+
+Decision criterion (balanced accuracy):
+  v6b vs v5  delta: -0.058
+  v6b vs v6  delta: -0.005
+  *** v6b does NOT beat v6 — template ensembling worse than hand-rewriting for this prompt set ***
+
+Outputs → reports/baselines/logreg_biomedclip_v6b/

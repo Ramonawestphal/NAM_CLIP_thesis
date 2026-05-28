@@ -1,0 +1,9 @@
+positive_concept,negative_concept,target_class,diff_v1,status_v1,diff_v2,status_v2,delta
+asymmetry,symmetric_uniform,mel,0.00991,PASS,-0.01945,FAIL,-0.02936
+border_irregularity,symmetric_uniform,mel,-0.03276,FAIL,-0.06213,FAIL,-0.02937
+colour_variation,symmetric_uniform,mel,-0.00752,FAIL,-0.03689,FAIL,-0.02937
+atypical_pigment_network,reticular_network,mel,0.00624,PASS,0.01298,PASS,0.00674
+red_lacunae,all_others,vasc,0.03247,PASS,0.03075,PASS,-0.00172
+arborizing_vessels,reticular_network,bcc,-0.02557,FAIL,-0.01937,FAIL,0.0062
+scaly_surface,symmetric_uniform,akiec,0.03874,PASS,-0.00429,FAIL,-0.04303
+milia_like_cysts,atypical_pigment_network,bkl,-0.0106,FAIL,-0.0106,FAIL,0.0

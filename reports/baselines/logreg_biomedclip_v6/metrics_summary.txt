@@ -1,0 +1,46 @@
+==== Logistic Regression Baseline (BiomedCLIP v6 features, 24 concepts, balanced) ====
+
+Aggregate metrics:
+  Balanced accuracy            : 0.5547
+  Macro F1                     : 0.4480
+  Weighted F1                  : 0.6390
+  Top-1 accuracy               : 0.5945
+  Multiclass AUC (OvR weighted): 0.8602
+
+Per-class metrics (sorted by support desc):
+       precision  recall  f1-score  support
+nv        0.9291  0.6372    0.7560     1337
+mel       0.2997  0.4495    0.3596      218
+bkl       0.3724  0.4954    0.4252      218
+bcc       0.4056  0.5800    0.4774      100
+akiec     0.2414  0.5645    0.3382       62
+vasc      0.5676  0.6562    0.6087       32
+df        0.1029  0.5000    0.1707       28
+
+Per-class AUC (OvR):
+  nv    : 0.8740
+  mel   : 0.7694
+  bkl   : 0.8029
+  bcc   : 0.9237
+  akiec : 0.8967
+  vasc  : 0.9831
+  df    : 0.9016
+
+Confusion matrix (row-normalised, rows=true, cols=pred):
+       akiec   bcc   bkl    df   mel    nv  vasc
+akiec  0.565 0.161 0.161 0.048 0.032 0.032 0.000
+bcc    0.140 0.580 0.100 0.090 0.030 0.040 0.020
+bkl    0.096 0.092 0.495 0.032 0.193 0.083 0.009
+df     0.250 0.036 0.071 0.500 0.036 0.107 0.000
+mel    0.115 0.064 0.170 0.028 0.450 0.165 0.009
+nv     0.032 0.023 0.092 0.073 0.135 0.637 0.007
+vasc   0.000 0.281 0.000 0.000 0.000 0.062 0.656
+
+Logistic Regression: v5 (72-feature) vs v6 (24-feature)
+  Balanced accuracy:  v5 0.608 -> v6 0.555  (Δ -0.053)
+  Macro F1:           v5 0.485 -> v6 0.448  (Δ -0.037)
+  Multiclass AUC:     v5 0.891 -> v6 0.860  (Δ -0.031)
+
+  *** WARNING: balanced accuracy dropped 0.053 (threshold 0.04) — investigate feature consolidation ***
+
+Outputs → reports/baselines/logreg_biomedclip_v6/

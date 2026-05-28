@@ -1,0 +1,191 @@
+# HAM10000 Concept Prompts - VERSION 3
+#
+# Iteration history:
+#   v1: original prompts based on ABCD rule + 7-point checklist + LLM-augmented
+#       concepts. 4/8 paired contrasts passed.
+#   v2: tried "benign melanocytic nevus" framing for symmetric_uniform and
+#       "delicate uniform pigment grid" framing for reticular_network.
+#       Result: 2/8 paired contrasts passed — WORSE. The word "melanocytic"
+#       activated for melanoma images as well as nevi (both are melanocytic
+#       lesions), demonstrating that adding domain-specific terminology can
+#       hurt discrimination when the terminology spans both target classes.
+#   v3 (this file): reverts to visual-descriptor framing for both concepts.
+#       For symmetric_uniform: emphasizes "small + round + smooth edge"
+#       (visual properties melanomas typically lack). For reticular_network:
+#       describes the visual structure ("fine soft mesh", "thin evenly
+#       spaced lines") rather than abstract regularity qualifiers.
+#       All other concepts unchanged from v1.
+#
+# Format: each concept has an ID, a short name, a tier, and 3 phrasing variants.
+# Tier 1 = ABCD rule (Stolz et al., 1994)
+# Tier 2 = 7-point checklist (Argenziano et al., 1998)
+# Tier 3 = LLM-augmented class-discriminative concepts
+# Template 1 = "dermoscopic image" (technical, CLIP-style)
+# Template 2 = "dermatoscopic image" (alternative technical phrasing)
+# Template 3 = "close-up photograph" (plain English, general CLIP)
+#
+# Total: 24 concepts x 3 phrasings = 72 prompts
+
+# ============================================================
+# TIER 1: ABCD RULE OF DERMATOSCOPY
+# ============================================================
+
+[asymmetry]
+tier: 1
+t1: a dermoscopic image of an asymmetric skin lesion
+t2: a dermatoscopic image showing a skin lesion with asymmetric shape along both axes
+t3: a close-up photograph of a mole that is asymmetric in outline
+
+[border_irregularity]
+tier: 1
+t1: a dermoscopic image with an irregular and asymmetric border
+t2: a dermatoscopic image showing a skin lesion with jagged, notched borders
+t3: a close-up photograph of a mole with poorly defined edges
+
+[colour_variation]
+tier: 1
+t1: a dermoscopic image of a lesion with multiple colours
+t2: a dermatoscopic image showing variegated pigmentation including brown, black, and red
+t3: a close-up photograph of a skin lesion with uneven color distribution
+
+[diameter_large]
+tier: 1
+t1: a dermoscopic image of a large skin lesion greater than six millimetres
+t2: a dermatoscopic image of a wide pigmented lesion
+t3: a close-up photograph of a sizeable mole
+
+# ============================================================
+# TIER 2: 7-POINT CHECKLIST
+# ============================================================
+
+[atypical_pigment_network]
+tier: 2
+t1: a dermoscopic image showing an atypical pigment network
+t2: a dermatoscopic image with an irregular brown grid pattern
+t3: a close-up photograph of a lesion with a disrupted pigment network
+
+[blue_white_veil]
+tier: 2
+t1: a dermoscopic image showing a blue-white veil
+t2: a dermatoscopic image with a confluent blue-white area
+t3: a close-up photograph of a lesion with bluish-white structureless regions
+
+[atypical_vascular_pattern]
+tier: 2
+t1: a dermoscopic image showing atypical vascular structures
+t2: a dermatoscopic image with irregular blood vessels
+t3: a close-up photograph of a lesion containing dotted or linear vessels
+
+[irregular_streaks]
+tier: 2
+t1: a dermoscopic image showing irregular radial streaks
+t2: a dermatoscopic image with pseudopods at the lesion edge
+t3: a close-up photograph of a lesion with streaks at the periphery
+
+[irregular_pigmentation]
+tier: 2
+t1: a dermoscopic image with irregular dark pigmented blotches
+t2: a dermatoscopic image showing structureless black areas
+t3: a close-up photograph of a lesion with patchy dark pigment
+
+[irregular_dots_globules]
+tier: 2
+t1: a dermoscopic image showing irregular dots and globules
+t2: a dermatoscopic image with asymmetrically distributed pigmented globules
+t3: a close-up photograph of a lesion with scattered brown dots
+
+[regression_structures]
+tier: 2
+t1: a dermoscopic image showing regression structures
+t2: a dermatoscopic image with white scar-like areas and peppering
+t3: a close-up photograph of a lesion with whitish depigmented regions
+
+# ============================================================
+# TIER 3: LLM-AUGMENTED CLASS-DISCRIMINATIVE CONCEPTS
+# ============================================================
+
+# CHANGED in v3 (Candidate F): visual-descriptor framing using "small",
+# "round", "smooth edge" — properties melanomas typically lack. v1 wording
+# scored too high on melanoma due to generic "uniform brown" descriptors;
+# v2 wording was worse because "melanocytic" activated on melanoma.
+[symmetric_uniform]
+tier: 3
+t1: a dermoscopic image of a small symmetric mole with a smooth edge
+t2: a dermatoscopic image of a round even-coloured mole
+t3: a close-up photograph of a small round mole
+
+# CHANGED in v3 (Candidate G): describes the visual structure of a benign
+# reticular pattern ("fine soft mesh", "thin evenly spaced lines") rather
+# than abstract regularity claims that CLIP could not distinguish from
+# "atypical pigment network".
+[reticular_network]
+tier: 3
+t1: a dermoscopic image of a mole with a fine soft brown mesh pattern
+t2: a dermatoscopic image showing thin evenly spaced pigment lines
+t3: a close-up photograph of a mole with thin evenly spaced brown lines
+
+[arborizing_vessels]
+tier: 3
+t1: a dermoscopic image showing arborizing tree-like blood vessels
+t2: a dermatoscopic image with branched telangiectatic vessels
+t3: a close-up photograph of a lesion with tree-branch vasculature
+
+[blue_grey_ovoid_nests]
+tier: 3
+t1: a dermoscopic image showing blue-grey ovoid nests
+t2: a dermatoscopic image with large blue-grey pigmented nests
+t3: a close-up photograph of a lesion with grey-blue oval clusters
+
+[ulceration]
+tier: 3
+t1: a dermoscopic image of an ulcerated skin lesion
+t2: a dermatoscopic image showing surface erosion or ulcer
+t3: a close-up photograph of a lesion with an open wound
+
+[scaly_surface]
+tier: 3
+t1: a dermoscopic image of a skin lesion with a scaly surface
+t2: a dermatoscopic image showing keratotic scaling
+t3: a close-up photograph of a rough, scaly patch of skin
+
+[strawberry_pattern]
+tier: 3
+t1: a dermoscopic image showing a strawberry pattern with red pseudonetwork
+t2: a dermatoscopic image with red dots around hair follicles
+t3: a close-up photograph of a facial actinic lesion with red pseudonetwork
+
+[milia_like_cysts]
+tier: 3
+t1: a dermoscopic image showing milia-like cysts
+t2: a dermatoscopic image with small white round inclusions
+t3: a close-up photograph of a lesion with white milky cyst-like spots
+
+[comedo_like_openings]
+tier: 3
+t1: a dermoscopic image showing comedo-like openings
+t2: a dermatoscopic image with brown pseudofollicular plugs
+t3: a close-up photograph of a lesion with crater-like dark openings
+
+[cerebriform_surface]
+tier: 3
+t1: a dermoscopic image with a cerebriform brain-like surface
+t2: a dermatoscopic image showing a gyriform fissured pattern
+t3: a close-up photograph of a lesion with a wavy brain-like texture
+
+[central_white_patch]
+tier: 3
+t1: a dermoscopic image showing a central white scar-like patch
+t2: a dermatoscopic image with a peripheral pigment network surrounding a white centre
+t3: a close-up photograph of a firm lesion with a white centre
+
+[red_lacunae]
+tier: 3
+t1: a dermoscopic image showing red lacunae
+t2: a dermatoscopic image with bright red vascular spaces
+t3: a close-up photograph of a vascular lesion with red lake-like areas
+
+[healthy_skin]
+tier: 3
+t1: a dermoscopic image of normal healthy skin
+t2: a dermatoscopic image with no visible lesion
+t3: a close-up photograph of unremarkable skin
