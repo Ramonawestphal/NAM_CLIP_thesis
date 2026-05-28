@@ -1,0 +1,49 @@
+==== Three-way comparison: ViT-B/32 v4 vs BiomedCLIP v4 vs BiomedCLIP v5_biomedclip ====
+
+Per disease group (mean AUC across designed-target concepts):
+
+   mel    : ViT32_v4 0.520  |  BMC_v4 0.525  |  BMC_v5 0.580  |  Δ v4→v5: +0.055  (n=11)
+   bcc    : ViT32_v4 0.468  |  BMC_v4 0.514  |  BMC_v5 0.514  |  Δ v4→v5: +0.000  (n=3)
+   akiec  : ViT32_v4 0.456  |  BMC_v4 0.652  |  BMC_v5 0.652  |  Δ v4→v5: +0.000  (n=2)
+   bkl    : ViT32_v4 0.441  |  BMC_v4 0.648  |  BMC_v5 0.648  |  Δ v4→v5: +0.000  (n=3)
+   df     : ViT32_v4 0.556  |  BMC_v4 0.654  |  BMC_v5 0.654  |  Δ v4→v5: +0.000  (n=1)
+   nv     : ViT32_v4 0.624  |  BMC_v4 0.695  |  BMC_v5 0.706  |  Δ v4→v5: +0.011  (n=3)
+   vasc   : ViT32_v4 0.554  |  BMC_v4 0.814  |  BMC_v5 0.814  |  Δ v4→v5: +0.000  (n=1)
+
+Overall mean across all 24 concepts:
+   ViT-B/32 v4         : 0.514
+   BiomedCLIP v4       : 0.588
+   BiomedCLIP v5       : 0.615
+   Δ v4→v5 (BiomedCLIP): +0.027
+
+Malignant-only mean (mel + bcc + akiec; 16 concepts):
+   ViT-B/32 v4         : 0.502
+   BiomedCLIP v4       : 0.539
+   BiomedCLIP v5       : 0.576
+   Δ v4→v5 (BiomedCLIP): +0.038
+
+[KEY METRIC] Melanoma-only mean (mel; 11 concepts):
+   ViT-B/32 v4         : 0.520
+   BiomedCLIP v4       : 0.525
+   BiomedCLIP v5       : 0.580
+   Δ v4→v5 (BiomedCLIP): +0.055
+
+Top 5 concepts by BiomedCLIP v4→v5 improvement:
+   [regression_structures]  designed=mel  BMC_v4=0.469  BMC_v5=0.579  Δ=+0.109
+   [colour_variation]  designed=mel  BMC_v4=0.534  BMC_v5=0.641  Δ=+0.108
+   [blue_white_veil]  designed=mel  BMC_v4=0.513  BMC_v5=0.607  Δ=+0.094
+   [irregular_dots_globules]  designed=mel  BMC_v4=0.534  BMC_v5=0.624  Δ=+0.091
+   [atypical_vascular_pattern]  designed=mel  BMC_v4=0.409  BMC_v5=0.497  Δ=+0.089
+
+Top 5 concepts by BiomedCLIP v4→v5 regression (if any):
+   [border_irregularity]  designed=mel  BMC_v4=0.614  BMC_v5=0.574  Δ=-0.040
+   [asymmetry]  designed=mel  BMC_v4=0.510  BMC_v5=0.479  Δ=-0.031
+   [reticular_network]  designed=nv  BMC_v4=0.655  BMC_v5=0.655  Δ=-0.000
+
+Concepts where BMC_v5 improves over BMC_v4 by ≥0.02 AUC: 10 / 24
+Concepts where BMC_v5 regresses against BMC_v4 by ≥0.02 AUC: 2 / 24
+
+Per-template results for melanoma-targeted concepts (BMC_v5 only):
+   t1 ("Dermoscopy of melanoma showing ..."):  mean AUC on mel = 0.548
+   t2 ("Dermoscopic image of melanoma demonstrating ..."):  mean AUC on mel = 0.545
+   t3 ("[feature] in dermoscopy of melanoma"):  mean AUC on mel = 0.516

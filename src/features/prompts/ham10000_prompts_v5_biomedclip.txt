@@ -1,0 +1,211 @@
+# HAM10000 Concept Prompts - VERSION 5 (BiomedCLIP-targeted)
+#
+# Rationale: BiomedCLIP was pretrained on PubMed Central image-caption pairs
+# from biomedical literature. Its PubMedBERT text encoder is tuned for the
+# linguistic distribution of medical paper captions, which differs substantially
+# from the web image-caption distribution standard CLIP was trained on.
+#
+# Diagnostic results on BiomedCLIP + v4 prompts (which were optimized for
+# ViT-B/32) showed:
+#   - Strong gains on non-melanoma classes: bkl (+0.207), akiec (+0.196),
+#     vasc (+0.260), df (+0.098), nv (+0.070), bcc (+0.046)
+#   - Essentially no gain on melanoma: mel (+0.005)
+#
+# v5_biomedclip targets the melanoma gap specifically. The mel-targeted and
+# nv-anchor concepts use new templates designed to match the PubMed dermatology
+# caption distribution:
+#   - bt1: "Dermoscopy of [disease] showing [feature]" (PubMed-caption style)
+#   - bt2: "Dermoscopic image of [disease] demonstrating [feature]" (alternative
+#         caption-style with explicit disease anchor)
+#   - bt3: "[Feature description] in dermoscopy of [disease]" (feature-first
+#         with disease context)
+#
+# The disease anchor is "melanoma" for melanoma-targeted concepts and
+# "melanocytic nevus" for the benign-nevus-anchor concepts (symmetric_uniform,
+# reticular_network).
+#
+# All other concepts (bkl, akiec, bcc, df, vasc, healthy_skin) retain their v4
+# wording — these performed well under BiomedCLIP with v4 prompts and do not
+# need rephrasing.
+#
+# IMPORTANT NOTE ON THE NEVUS ANCHORS:
+# An earlier ViT-B/32 iteration (v2) tried "benign melanocytic nevus" framing
+# and failed because the BPE tokenizer fragment "melanocytic" activated on
+# melanoma images. BiomedCLIP uses PubMedBERT, which encodes "melanocytic
+# nevus" and "melanoma" as semantically distinct entities from its literature
+# pretraining. This is an empirically testable hypothesis: if v5_biomedclip
+# improves nv-anchor concept performance, BiomedCLIP handles the medical
+# taxonomy correctly; if not, the same lexical-fragment issue may apply.
+#
+# Format: each concept has an ID, a short name, a tier, and 3 phrasing variants.
+# Template labels (bt1/bt2/bt3 for BiomedCLIP variants, t1/t2/t3 for v4-style
+# variants) are normalized to t1/t2/t3 in the prompt loader.
+#
+# Total: 24 concepts x 3 phrasings = 72 prompts
+
+# ============================================================
+# TIER 1: ABCD RULE OF DERMATOSCOPY
+# All four are melanoma-targeted — use BiomedCLIP-specific templates.
+# ============================================================
+
+[asymmetry]
+tier: 1
+t1: Dermoscopy of melanoma showing an asymmetric pigmented lesion
+t2: Dermoscopic image of melanoma demonstrating asymmetric shape along both axes
+t3: Asymmetric outline of a pigmented lesion in dermoscopy of melanoma
+
+[border_irregularity]
+tier: 1
+t1: Dermoscopy of melanoma showing irregular and jagged lesion borders
+t2: Dermoscopic image of melanoma demonstrating notched and ill-defined borders
+t3: Irregular notched borders of a pigmented lesion in dermoscopy of melanoma
+
+[colour_variation]
+tier: 1
+t1: Dermoscopy of melanoma showing variegated pigmentation with multiple colours
+t2: Dermoscopic image of melanoma demonstrating brown, black, and red colour variation
+t3: Multi-coloured variegated pigmentation in dermoscopy of melanoma
+
+[diameter_large]
+tier: 1
+t1: Dermoscopy of melanoma showing a large pigmented lesion greater than six millimetres
+t2: Dermoscopic image of melanoma demonstrating a broad pigmented surface
+t3: A large pigmented lesion in dermoscopy of melanoma
+
+# ============================================================
+# TIER 2: 7-POINT CHECKLIST
+# All seven are melanoma-targeted — use BiomedCLIP-specific templates.
+# ============================================================
+
+[atypical_pigment_network]
+tier: 2
+t1: Dermoscopy of melanoma showing an atypical pigment network
+t2: Dermoscopic image of melanoma demonstrating an irregular broadened pigment network
+t3: An atypical pigment network with thickened lines in dermoscopy of melanoma
+
+[blue_white_veil]
+tier: 2
+t1: Dermoscopy of melanoma showing a blue-white veil
+t2: Dermoscopic image of melanoma demonstrating a confluent blue-whitish structureless area
+t3: A blue-white veil overlying pigmented areas in dermoscopy of melanoma
+
+[atypical_vascular_pattern]
+tier: 2
+t1: Dermoscopy of melanoma showing atypical vascular structures
+t2: Dermoscopic image of melanoma demonstrating polymorphous atypical vessels
+t3: Atypical polymorphous vascular structures in dermoscopy of melanoma
+
+[irregular_streaks]
+tier: 2
+t1: Dermoscopy of melanoma showing irregular radial streaks and pseudopods
+t2: Dermoscopic image of melanoma demonstrating asymmetric peripheral streaks
+t3: Irregular radial streaks at the periphery in dermoscopy of melanoma
+
+[irregular_pigmentation]
+tier: 2
+t1: Dermoscopy of melanoma showing irregular pigmented blotches
+t2: Dermoscopic image of melanoma demonstrating asymmetric dark structureless areas
+t3: Irregular structureless dark pigmentation in dermoscopy of melanoma
+
+[irregular_dots_globules]
+tier: 2
+t1: Dermoscopy of melanoma showing irregular dots and globules
+t2: Dermoscopic image of melanoma demonstrating asymmetrically distributed pigmented globules
+t3: Irregular asymmetric dots and globules in dermoscopy of melanoma
+
+[regression_structures]
+tier: 2
+t1: Dermoscopy of melanoma showing regression structures
+t2: Dermoscopic image of melanoma demonstrating white scar-like areas and peppering
+t3: Regression structures with peppering and scar-like depigmentation in dermoscopy of melanoma
+
+# ============================================================
+# TIER 3: LLM-AUGMENTED CLASS-DISCRIMINATIVE CONCEPTS
+# Only symmetric_uniform and reticular_network use BiomedCLIP-specific
+# templates (nv-anchor). All others retain v4 wording (already working well
+# under BiomedCLIP).
+# ============================================================
+
+# NV-ANCHOR (changed in v5_biomedclip): anchored on "melanocytic nevus" rather
+# than melanoma. Testing whether BiomedCLIP's PubMedBERT correctly distinguishes
+# "melanocytic nevus" from "melanoma" (which would not be the case under
+# ViT-B/32's BPE tokenizer).
+[symmetric_uniform]
+tier: 3
+t1: Dermoscopy of melanocytic nevus showing a symmetric uniformly pigmented lesion
+t2: Dermoscopic image of benign nevus demonstrating a small round even-coloured lesion
+t3: A symmetric small round pigmented lesion in dermoscopy of melanocytic nevus
+
+# NV-ANCHOR (changed in v5_biomedclip)
+[reticular_network]
+tier: 3
+t1: Dermoscopy of melanocytic nevus showing a regular reticular pigment network
+t2: Dermoscopic image of benign nevus demonstrating an even fine pigment network
+t3: A regular evenly distributed reticular network in dermoscopy of melanocytic nevus
+
+# UNCHANGED FROM v4 — these performed well under BiomedCLIP.
+[arborizing_vessels]
+tier: 3
+t1: a dermoscopic image showing arborizing tree-like blood vessels
+t2: a dermatoscopic image with branched telangiectatic vessels
+t3: a close-up photograph of a lesion with tree-branch vasculature
+
+[blue_grey_ovoid_nests]
+tier: 3
+t1: a dermoscopic image showing blue-grey ovoid nests
+t2: a dermatoscopic image with large blue-grey pigmented nests
+t3: a close-up photograph of a lesion with grey-blue oval clusters
+
+[ulceration]
+tier: 3
+t1: a dermoscopic image of an ulcerated skin lesion
+t2: a dermatoscopic image showing surface erosion or ulcer
+t3: a close-up photograph of a lesion with an open wound
+
+[scaly_surface]
+tier: 3
+t1: a dermoscopic image of a skin lesion with a scaly surface
+t2: a dermatoscopic image showing keratotic scaling
+t3: a close-up photograph of a rough, scaly patch of skin
+
+[strawberry_pattern]
+tier: 3
+t1: a dermoscopic image showing a strawberry pattern with red pseudonetwork
+t2: a dermatoscopic image with red dots around hair follicles
+t3: a close-up photograph of a facial actinic lesion with red pseudonetwork
+
+[milia_like_cysts]
+tier: 3
+t1: a dermoscopic image showing milia-like cysts
+t2: a dermatoscopic image with small white round inclusions
+t3: a close-up photograph of a lesion with white milky cyst-like spots
+
+[comedo_like_openings]
+tier: 3
+t1: a dermoscopic image showing comedo-like openings
+t2: a dermatoscopic image with brown pseudofollicular plugs
+t3: a close-up photograph of a lesion with crater-like dark openings
+
+[cerebriform_surface]
+tier: 3
+t1: a dermoscopic image with a cerebriform brain-like surface
+t2: a dermatoscopic image showing a gyriform fissured pattern
+t3: a close-up photograph of a lesion with a wavy brain-like texture
+
+[central_white_patch]
+tier: 3
+t1: a dermoscopic image showing a central white scar-like patch
+t2: a dermatoscopic image with a peripheral pigment network surrounding a white centre
+t3: a close-up photograph of a firm lesion with a white centre
+
+[red_lacunae]
+tier: 3
+t1: a dermoscopic image showing red lacunae
+t2: a dermatoscopic image with bright red vascular spaces
+t3: a close-up photograph of a vascular lesion with red lake-like areas
+
+[healthy_skin]
+tier: 3
+t1: a dermoscopic image of normal healthy skin
+t2: a dermatoscopic image with no visible lesion
+t3: a close-up photograph of unremarkable skin

@@ -1,0 +1,62 @@
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=2, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 0.0 * R_perp + 0.1 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 0.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 0.1
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.4629 +/- nan
+  Macro F1                     : 0.3258 +/- nan
+  Weighted F1                  : 0.5453 +/- nan
+  Top-1 accuracy               : 0.4882 +/- nan
+  Multiclass AUC (OvR weighted): 0.7752 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.3419 +/- nan
+  R_perp train : 0.3284 +/- nan
+  R_sparse train: 164.976150 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.4629 (-0.092)
+  vs v6 NAM Phase-1  (0.498): 0.4629 (-0.035)
+  vs v5 NAM baseline (0.540): 0.4629 (-0.077)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.8948  0.5153    0.6540 0.7824     1337
+mel       0.2570  0.4633    0.3306 0.7052      218
+bkl       0.3597  0.4587    0.4032 0.7569      218
+bcc       0.3188  0.2200    0.2604 0.7721      100
+akiec     0.1824  0.4355    0.2571 0.8414       62
+vasc      0.1655  0.7188    0.2690 0.9169       32
+df        0.0606  0.4286    0.1062 0.8198       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.435  0.113  0.177  0.113  0.048  0.065  0.048
+bcc    0.140  0.220  0.150  0.160  0.070  0.080  0.180
+bkl    0.101  0.041  0.459  0.037  0.206  0.124  0.032
+df     0.107  0.036  0.071  0.429  0.071  0.107  0.179
+mel    0.069  0.032  0.179  0.046  0.463  0.165  0.046
+nv     0.050  0.016  0.083  0.107  0.174  0.515  0.055
+vasc   0.000  0.062  0.000  0.062  0.062  0.094  0.719
+
+Outputs -> reports/nam/sanity_c/
+

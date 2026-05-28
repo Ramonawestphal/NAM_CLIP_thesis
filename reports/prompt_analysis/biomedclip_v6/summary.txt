@@ -1,0 +1,57 @@
+==== Prompt Analysis: BiomedCLIP v6 (24 concepts, single template) ====
+
+1. Intended-class AUC per concept (sorted descending):
+               concept_id target_class  intended_auc  auc_max auc_max_class
+         milia_like_cysts          bkl        0.7157   0.7157           bkl
+      central_white_patch           df        0.6906   0.6906            df
+      cerebriform_surface          bkl        0.6879   0.6879           bkl
+             healthy_skin           nv        0.6802   0.6802            nv
+        symmetric_uniform           nv        0.6720   0.6720            nv
+     comedo_like_openings          bkl        0.6689   0.6689           bkl
+            scaly_surface        akiec        0.6564   0.6564         akiec
+         colour_variation          mel        0.6412   0.6454           bkl
+       strawberry_pattern        akiec        0.6267   0.6267         akiec
+        reticular_network           nv        0.6254   0.6254            nv
+  irregular_dots_globules          mel        0.6108   0.6110           bkl
+               ulceration          bcc        0.6050   0.6521          vasc
+   irregular_pigmentation          mel        0.5998   0.5998           mel
+              red_lacunae         vasc        0.5989   0.6316            nv
+           diameter_large          mel        0.5769   0.6087            nv
+      border_irregularity          mel        0.5744   0.5744           mel
+        irregular_streaks          mel        0.5679   0.5679           mel
+ atypical_pigment_network          mel        0.5494   0.5759            nv
+       arborizing_vessels          bcc        0.5021   0.7007         akiec
+atypical_vascular_pattern          mel        0.4972   0.5727            nv
+    regression_structures          mel        0.4811   0.5357            nv
+                asymmetry          mel        0.4791   0.6694            nv
+          blue_white_veil          mel        0.4552   0.6351            nv
+    blue_grey_ovoid_nests          bcc        0.4452   0.5951           mel
+
+   Mean intended-class AUC: 0.5920
+
+2. Mean intended-class AUC by disease group (v5 vs v6):
+disease_group  n_concepts  v5_mean_auc  v6_mean_auc   delta
+        akiec           2        0.652       0.6416 -0.0104
+          bcc           3        0.514       0.5174  0.0034
+          bkl           3        0.648       0.6908  0.0428
+           df           1        0.654       0.6906  0.0366
+          mel          11        0.580       0.5485 -0.0315
+           nv           3        0.706       0.6592 -0.0468
+         vasc           1        0.814       0.5989 -0.2151
+
+3. Top auc_max across 24 concepts:
+          concept_id target_class  auc_max auc_max_class
+    milia_like_cysts          bkl   0.7157           bkl
+  arborizing_vessels          bcc   0.7007         akiec
+ central_white_patch           df   0.6906            df
+ cerebriform_surface          bkl   0.6879           bkl
+        healthy_skin           nv   0.6802            nv
+   symmetric_uniform           nv   0.6720            nv
+           asymmetry          mel   0.6694            nv
+comedo_like_openings          bkl   0.6689           bkl
+       scaly_surface        akiec   0.6564         akiec
+          ulceration          bcc   0.6521          vasc
+
+   No concepts with auc_max ≥ 0.85.
+
+Outputs → reports\prompt_analysis\biomedclip_v6

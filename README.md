@@ -17,9 +17,24 @@ Thesis codebase: Neural Additive Models (NAM) with planned CLIP feature integrat
 
 ## Setup
 
+### Local (CPU or CUDA)
+
 ```bash
-cd clip-nam-thesis
 pip install -r requirements.txt
+```
+
+For GPU support, install the CUDA-enabled torch build **before** running the command above (or instead of the torch line in requirements.txt):
+
+```bash
+pip install torch==2.3.0 torchvision==0.18.0 --index-url https://download.pytorch.org/whl/cu121
+```
+
+### Google Colab (T4)
+
+Colab ships with a compatible torch. Only the extra packages are needed:
+
+```bash
+pip install open_clip_torch==2.24.0 Pillow==10.3.0 tqdm==4.66.4
 ```
 
 Place ProPublica COMPAS CSV files under `data/compas/`. Other datasets are populated when you download them.

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\\\\data\\\\ham10000\" | ForEach-Object { $_.Name })",
+      "PowerShell(Import-Csv \"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\\\\data\\\\ham10000\\\\HAM10000_metadata.csv\")",
+      "PowerShell([System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\\\\src\\\\features\\\\prompts\\\\ham10000_prompts.txt\"\\).Length)",
+      "Bash(python -c \"import pathlib; print\\(pathlib.Path\\('scripts/run_concurvity_sweep.py'\\).exists\\(\\)\\)\")",
+      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --concurvity_lambda 1.0 --out_dir reports/nam/sanity_b --skip_convergence_check)",
+      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 0.1 --out_dir reports/nam/sanity_c --skip_convergence_check)",
+      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --concurvity_lambda 1.0 --out_dir reports/nam/sanity2_b --skip_convergence_check)",
+      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 1.0 --out_dir reports/nam/sanity2_c --skip_convergence_check)",
+      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 500.0 --out_dir reports/nam/sanity2_probe --skip_convergence_check)",
+      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 1.0 --no-proximal_sparsity --out_dir reports/nam/sanity2_d --skip_convergence_check)"
+    ]
+  }
+}

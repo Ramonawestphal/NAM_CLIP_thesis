@@ -25,3 +25,6 @@ results/**
 
 .DS_Store
 Thumbs.db
+
+# Reference implementations (read-only, not committed)
+references/
