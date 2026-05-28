@@ -20,7 +20,7 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Sequence
+from typing import List, Sequence, Tuple
 
 import numpy as np
 import torch
@@ -79,6 +79,7 @@ class NAMMulticlass(nn.Module):
         hidden_dims: Sequence[int] = (64, 64, 32),
         dropout: float = 0.1,
         feature_dropout: float = 0.0,
+        concept_names: Sequence[str] | None = None,
     ) -> None:
         super().__init__()
         self.n_features = n_features
@@ -89,6 +90,23 @@ class NAMMulticlass(nn.Module):
             for _ in range(n_features)
         ])
         self.bias = nn.Parameter(torch.zeros(num_classes))
+        if concept_names is not None:
+            assert len(concept_names) == n_features, (
+                f"concept_names length {len(concept_names)} != n_features {n_features}"
+            )
+            self._concept_names: List[str] = list(concept_names)
+        else:
+            self._concept_names = [str(i) for i in range(n_features)]
+
+    def feature_subnetworks(self) -> List[Tuple[str, nn.Module]]:
+        """(concept_name, sub_network) pairs in feature-column order.
+
+        Used by group_lasso_penalty() and feature_group_norms() in
+        src/models/sparsity.py to iterate over per-feature parameter groups.
+        The global bias (self.bias) is NOT included — it is not part of
+        any sub-network group.
+        """
+        return list(zip(self._concept_names, self.feature_nns))
 
     def forward(
         self,

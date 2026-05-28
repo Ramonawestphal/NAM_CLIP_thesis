@@ -1,0 +1,62 @@
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 5 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 0.0 * R_perp + 1.0 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 0.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 1.0
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.4198 +/- 0.0147
+  Macro F1                     : 0.2826 +/- 0.0256
+  Weighted F1                  : 0.4677 +/- 0.0535
+  Top-1 accuracy               : 0.4121 +/- 0.0533
+  Multiclass AUC (OvR weighted): 0.7350 +/- 0.0128
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.3478 +/- 0.0237
+  R_perp train : 0.3479 +/- 0.0260
+  R_sparse train: 147.191873 +/- 12.398077
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.4198 (-0.135)
+  vs v6 NAM Phase-1  (0.498): 0.4198 (-0.078)
+  vs v5 NAM baseline (0.540): 0.4198 (-0.120)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.8891  0.4154    0.5624 0.7306     1337
+mel       0.2055  0.4358    0.2788 0.6915      218
+bkl       0.2942  0.4367    0.3495 0.7166      218
+bcc       0.2339  0.1540    0.1766 0.7845      100
+akiec     0.1782  0.4839    0.2457 0.8478       62
+vasc      0.1794  0.7125    0.2843 0.8963       32
+df        0.0491  0.3000    0.0807 0.8115       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.484  0.161  0.181  0.055  0.058  0.029  0.032
+bcc    0.170  0.154  0.200  0.120  0.086  0.080  0.190
+bkl    0.127  0.041  0.437  0.034  0.220  0.102  0.039
+df     0.179  0.057  0.043  0.300  0.057  0.157  0.207
+mel    0.097  0.030  0.222  0.028  0.436  0.139  0.048
+nv     0.073  0.019  0.111  0.106  0.227  0.415  0.048
+vasc   0.012  0.044  0.000  0.031  0.112  0.088  0.712
+
+Outputs -> reports/nam/v6_sparsity_sweep/lam_1/
+

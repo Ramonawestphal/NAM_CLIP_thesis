@@ -59,6 +59,7 @@ from sklearn.metrics import (
 
 from src.models.nam_multiclass import NAMMulticlass
 from src.models.concurvity import multiclass_concurvity
+from src.models.sparsity import group_lasso_penalty, feature_group_norms, apply_proximal_step
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -91,28 +92,54 @@ CONVERGENCE_THRESHOLD = 0.50
 CONVERGENCE_EPOCH     = 30
 
 # ── Concurvity regularization (Siems et al. 2023) ────────────────────────────
-# L_total = L_task + CONCURVITY_LAMBDA * R_perp  (Siems et al. 2023, Eq. 2,
-#   multiclass avg: R_perp = mean_k mean_{i<j} |Corr(f_{i,k}, f_{j,k})|)
-# 0.0 → plain NAM; loss and gradients are bit-identical to the unregularized run.
-# R_perp is always logged as a diagnostic regardless of this value.
-# Suggested ablation values: {0.0, 0.001, 0.01, 0.1, 1.0}
+# L_total = L_task + CONCURVITY_LAMBDA * R_perp + SPARSITY_LAMBDA * R_sparse
+#
+# Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+#   R_perp = (1/K) * sum_k mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+#   0.0 → plain NAM; loss and gradients are bit-identical to unregularized run.
+#   R_perp is always logged as a diagnostic regardless of this value.
+#   Suggested ablation values: {0.0, 0.001, 0.01, 0.1, 1.0}
 CONCURVITY_LAMBDA = 0.0
+
+# Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+#   R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+#   0.0 → no sparsity; loss and gradients identical to non-sparsity run.
+#   R_sparse is always logged as a diagnostic regardless of this value.
+#   Suggested sweep values: {0.0, 0.0001, 0.001, 0.01, 0.1, 1.0}
+SPARSITY_LAMBDA = 0.0
+
+# Threshold below which a sub-network's group norm is considered zeroed out.
+ZERO_THRESHOLD = 1e-4
+
+# Proximal gradient for Group LASSO (default True — the correct path).
+# True  → apply_proximal_step() after optimizer.step(); penalty NOT in loss.
+# False → add lambda*R_sparse to loss (subgradient, kept for ablation only;
+#         does NOT achieve exact group zeroing with Adam).
+PROXIMAL_SPARSITY = True
 
 # ── CLI overrides (applied after all defaults are set) ───────────────────────
 _parser = argparse.ArgumentParser(add_help=False)
-_parser.add_argument("--concurvity_lambda", type=float, default=None)
-_parser.add_argument("--out_dir",           type=str,   default=None)
-_parser.add_argument("--max_epochs",        type=int,   default=None)
-_parser.add_argument("--seed",              type=int,   default=None)
+_parser.add_argument("--concurvity_lambda",      type=float, default=None)
+_parser.add_argument("--sparsity_lambda",         type=float, default=None)
+_parser.add_argument("--proximal_sparsity",       action=argparse.BooleanOptionalAction, default=None)
+_parser.add_argument("--out_dir",                type=str,   default=None)
+_parser.add_argument("--max_epochs",             type=int,   default=None)
+_parser.add_argument("--seed",                   type=int,   default=None)
+_parser.add_argument("--skip_convergence_check", action="store_true", default=False)
 _cli, _ = _parser.parse_known_args()
 if _cli.concurvity_lambda is not None:
     CONCURVITY_LAMBDA = _cli.concurvity_lambda
+if _cli.sparsity_lambda is not None:
+    SPARSITY_LAMBDA = _cli.sparsity_lambda
+if _cli.proximal_sparsity is not None:
+    PROXIMAL_SPARSITY = _cli.proximal_sparsity
 if _cli.out_dir is not None:
     OUT_DIR = _cli.out_dir
 if _cli.max_epochs is not None:
     MAX_EPOCHS = _cli.max_epochs
 if _cli.seed is not None:
     SEEDS = [_cli.seed]
+SKIP_CONVERGENCE_CHECK = _cli.skip_convergence_check
 
 # ── Device ────────────────────────────────────────────────────────────────────
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -159,12 +186,14 @@ print(f"{'='*65}\n")
 # Load + split + standardise
 # ─────────────────────────────────────────────────────────────────────────────
 print("Loading features...")
-feat       = np.load(FEATURES_PATH, allow_pickle=True)
-scores     = feat["scores"]
-labels     = feat["labels"]
-lesion_ids = feat["lesion_ids"]
-image_ids  = feat["image_ids"]
+feat              = np.load(FEATURES_PATH, allow_pickle=True)
+scores            = feat["scores"]
+labels            = feat["labels"]
+lesion_ids        = feat["lesion_ids"]
+image_ids         = feat["image_ids"]
+concept_names_list = feat["concept_ids"].tolist()      # 24 concept names in column order
 assert scores.shape == (10015, N_FEATURES), f"Unexpected shape: {scores.shape}"
+assert len(concept_names_list) == N_FEATURES
 
 print("Loading splits...")
 split     = np.load(SPLITS_PATH)
@@ -280,6 +309,8 @@ print(f"  Winning config: hidden={list(HIDDEN_DIMS)}, dropout={DROPOUT}, wd={WEI
 print(f"  lr={LR} (ReduceLROnPlateau patience={SCHED_PATIENCE} factor={SCHED_FACTOR})")
 print(f"  batch={BATCH_SIZE}  max_epochs={MAX_EPOCHS}  patience={PATIENCE}")
 print(f"  class_weight='balanced'")
+print(f"  concurvity_lambda={CONCURVITY_LAMBDA}  sparsity_lambda={SPARSITY_LAMBDA}  "
+      f"proximal_sparsity={PROXIMAL_SPARSITY}")
 print(f"{'='*65}\n")
 
 all_results = []
@@ -298,6 +329,7 @@ for seed in SEEDS:
         num_classes=N_CLASSES,
         hidden_dims=HIDDEN_DIMS,
         dropout=DROPOUT,
+        concept_names=concept_names_list,
     ).to(DEVICE)
 
     optimizer = torch.optim.Adam(
@@ -319,35 +351,65 @@ for seed in SEEDS:
     training_log    = []
     reached_threshold_in_30 = False
 
+    # Print every epoch when run is short (sanity checks); else every 10.
+    verbose_every = 1 if MAX_EPOCHS <= 10 else 10
+
     for epoch in range(MAX_EPOCHS):
         model.train()
-        total_loss  = 0.0
-        total_rperp = 0.0
-        n_batches   = 0
+        total_loss   = 0.0
+        total_rperp  = 0.0
+        total_rsparse = 0.0
+        n_batches    = 0
         for X_b, y_b in loader:
             X_b, y_b = X_b.to(DEVICE), y_b.to(DEVICE)
             optimizer.zero_grad()
+
+            # ── Concurvity path (Siems et al. 2023) ──────────────────────────
             if CONCURVITY_LAMBDA > 0:
-                # L_total = L_task + lambda * R_perp  (Siems et al. 2023)
                 logits, shape_outs = model(X_b, return_shape_outputs=True)
                 task_loss = criterion(logits, y_b)
                 r_perp_b  = multiclass_concurvity(shape_outs)
                 loss = task_loss + CONCURVITY_LAMBDA * r_perp_b
             else:
-                # Plain NAM: identical loss and gradients to unregularized run.
-                # R_perp is computed under no_grad + eval (no PRNG side-effects).
+                # Plain NAM: identical loss/gradients to unregularized run.
+                # R_perp computed under no_grad + eval (no PRNG side-effects).
                 loss = criterion(model(X_b), y_b)
                 with torch.no_grad():
                     model.eval()
                     r_perp_b = multiclass_concurvity(model.shape_outputs(X_b))
                     model.train()
+
+            # ── Group LASSO sparsity path (Xu et al. 2022) ───────────────────
+            # Proximal path (PROXIMAL_SPARSITY=True, default):
+            #   Penalty is NOT added to the loss.  apply_proximal_step() is
+            #   the regularization; it runs after optimizer.step().
+            # Subgradient path (PROXIMAL_SPARSITY=False, ablation only):
+            #   Penalty is added to the loss.  Does not achieve exact zeroing.
+            if SPARSITY_LAMBDA > 0 and not PROXIMAL_SPARSITY:
+                r_sparse_grad = group_lasso_penalty(model)
+                loss = loss + SPARSITY_LAMBDA * r_sparse_grad
+
             loss.backward()
             optimizer.step()
-            total_loss  += loss.item() * len(y_b)
-            total_rperp += r_perp_b.item()
-            n_batches   += 1
-        train_loss  = total_loss / len(y_train_enc)
-        train_rperp = total_rperp / n_batches
+
+            if SPARSITY_LAMBDA > 0 and PROXIMAL_SPARSITY:
+                apply_proximal_step(
+                    model,
+                    optimizer.param_groups[0]["lr"],
+                    SPARSITY_LAMBDA,
+                )
+
+            # R_sparse diagnostic: always logged after all parameter updates.
+            with torch.no_grad():
+                r_sparse_b = group_lasso_penalty(model)
+
+            total_loss    += loss.item() * len(y_b)
+            total_rperp   += r_perp_b.item()
+            total_rsparse += r_sparse_b.item()
+            n_batches     += 1
+        train_loss   = total_loss / len(y_train_enc)
+        train_rperp  = total_rperp  / n_batches
+        train_rsparse = total_rsparse / n_batches
 
         model.eval()
         with torch.no_grad():
@@ -366,14 +428,16 @@ for seed in SEEDS:
             "lr":               current_lr,
             "r_perp_train":     train_rperp,
             "r_perp_val":       val_rperp,
+            "r_sparse_train":   train_rsparse,
         })
 
         scheduler.step(val_balacc)
 
-        if (epoch + 1) % 10 == 0:
+        if (epoch + 1) % verbose_every == 0:
             print(f"  Epoch {epoch+1:3d} | train_loss={train_loss:.4f} "
                   f"val_loss={val_loss:.4f} val_balacc={val_balacc:.4f} "
-                  f"lr={current_lr:.2e}")
+                  f"lr={current_lr:.2e} | "
+                  f"R_perp={train_rperp:.4f} R_sparse={train_rsparse:.6f}")
 
         if epoch < CONVERGENCE_EPOCH and val_balacc >= CONVERGENCE_THRESHOLD:
             reached_threshold_in_30 = True
@@ -392,19 +456,43 @@ for seed in SEEDS:
 
     log_df = pd.DataFrame(training_log)
     log_df.to_csv(os.path.join(seed_dir, "training_log.csv"), index=False)
-    _best_idx           = log_df["val_balanced_acc"].idxmax()
-    r_perp_val_at_best  = float(log_df.loc[_best_idx, "r_perp_val"])
+    _best_idx            = log_df["val_balanced_acc"].idxmax()
+    r_perp_val_at_best   = float(log_df.loc[_best_idx, "r_perp_val"])
     r_perp_train_at_best = float(log_df.loc[_best_idx, "r_perp_train"])
+    r_sparse_at_best     = float(log_df.loc[_best_idx, "r_sparse_train"])
 
     model.load_state_dict(
         torch.load(os.path.join(seed_dir, "best_model.pt"),
                    map_location=DEVICE, weights_only=True)
     )
+
+    # ── Feature group norms (Xu et al. 2022) on best-val checkpoint ──────────
+    model.eval()
+    norms = feature_group_norms(model)
+    norms_rows = [
+        {
+            "concept_name": name,
+            "group_norm":   norm,
+            "is_zeroed":    norm < ZERO_THRESHOLD,
+        }
+        for name, norm in norms.items()
+    ]
+    norms_df   = pd.DataFrame(norms_rows)
+    norms_df.to_csv(os.path.join(seed_dir, "feature_group_norms.csv"), index=False)
+    n_selected     = int((~norms_df["is_zeroed"]).sum())
+    zeroed_names   = norms_df.loc[norms_df["is_zeroed"], "concept_name"].tolist()
+    selected_names = norms_df.loc[~norms_df["is_zeroed"], "concept_name"].tolist()
+    print(f"  Feature selection: {n_selected}/{N_FEATURES} concepts active "
+          f"(group_norm >= {ZERO_THRESHOLD})")
+    if SPARSITY_LAMBDA > 0 and zeroed_names:
+        print(f"  Zeroed concepts  : {zeroed_names}")
+
     metrics = evaluate_on_test(model)
     print(f"  Test  bal_acc={metrics['balanced_accuracy']:.4f}  "
           f"macro_f1={metrics['macro_f1']:.4f}  "
           f"AUC={metrics['auc_ovr_weighted']:.4f}  "
-          f"R_perp_val@best={r_perp_val_at_best:.4f}")
+          f"R_perp_val@best={r_perp_val_at_best:.4f}  "
+          f"R_sparse@best={r_sparse_at_best:.6f}")
 
     all_results.append({
         "seed":                    seed,
@@ -413,6 +501,8 @@ for seed in SEEDS:
         "best_val_balacc":         best_val_balacc,
         "r_perp_val_at_best":      r_perp_val_at_best,
         "r_perp_train_at_best":    r_perp_train_at_best,
+        "r_sparse_train_at_best":  r_sparse_at_best,
+        "n_selected":              n_selected,
         "log_df":                  log_df,
         **{k: v for k, v in metrics.items()
            if k not in ("report_df", "confusion_matrix")},
@@ -421,31 +511,36 @@ for seed in SEEDS:
     })
 
 # ── Convergence guard ─────────────────────────────────────────────────────────
-if not any(r["reached_threshold_in_30"] for r in all_results):
+if not SKIP_CONVERGENCE_CHECK and not any(r["reached_threshold_in_30"] for r in all_results):
     raise RuntimeError(
         f"No seed reached val balanced accuracy >= {CONVERGENCE_THRESHOLD} "
-        f"within the first {CONVERGENCE_EPOCH} epochs. Check data and features."
+        f"within the first {CONVERGENCE_EPOCH} epochs. Check data and features. "
+        f"Use --skip_convergence_check to bypass (e.g. for short sanity-check runs)."
     )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Aggregate metrics
 # ─────────────────────────────────────────────────────────────────────────────
-AGG_KEYS = ["balanced_accuracy", "macro_f1", "weighted_f1",
-            "top1_accuracy", "auc_ovr_weighted"]
-RPERP_KEYS = ["r_perp_val_at_best", "r_perp_train_at_best"]
+AGG_KEYS    = ["balanced_accuracy", "macro_f1", "weighted_f1",
+               "top1_accuracy", "auc_ovr_weighted"]
+RPERP_KEYS  = ["r_perp_val_at_best", "r_perp_train_at_best"]
+RSPARSE_KEYS = ["r_sparse_train_at_best"]
+ALL_METRIC_KEYS = AGG_KEYS + RPERP_KEYS + RSPARSE_KEYS
 
 agg_rows = [{"seed": r["seed"],
              **{k: r[k] for k in AGG_KEYS},
-             **{k: r[k] for k in RPERP_KEYS}} for r in all_results]
+             **{k: r[k] for k in RPERP_KEYS},
+             **{k: r[k] for k in RSPARSE_KEYS},
+             "n_selected": r["n_selected"]} for r in all_results]
 agg_df   = pd.DataFrame(agg_rows)
-mean_row = {**agg_df[AGG_KEYS + RPERP_KEYS].mean().to_dict(), "seed": "mean"}
-std_row  = {**agg_df[AGG_KEYS + RPERP_KEYS].std().to_dict(),  "seed": "std"}
+mean_row = {**agg_df[ALL_METRIC_KEYS].mean().to_dict(), "seed": "mean"}
+std_row  = {**agg_df[ALL_METRIC_KEYS].std().to_dict(),  "seed": "std"}
 agg_df   = pd.concat([agg_df, pd.DataFrame([mean_row, std_row])], ignore_index=True)
 agg_df.to_csv(os.path.join(OUT_DIR, "aggregated_metrics.csv"), index=False)
 
-means = {k: float(mean_row[k]) for k in AGG_KEYS + RPERP_KEYS}
-stds  = {k: float(std_row[k])  for k in AGG_KEYS + RPERP_KEYS}
+means = {k: float(mean_row[k]) for k in ALL_METRIC_KEYS}
+stds  = {k: float(std_row[k])  for k in ALL_METRIC_KEYS}
 
 # Per-class metrics (seed-mean)
 report_mean = (
@@ -475,7 +570,9 @@ pd.DataFrame([{
     "patience":      PATIENCE,
     "sched_patience": SCHED_PATIENCE,
     "sched_factor":  SCHED_FACTOR,
-    "concurvity_lambda": CONCURVITY_LAMBDA,
+    "concurvity_lambda":  CONCURVITY_LAMBDA,
+    "sparsity_lambda":    SPARSITY_LAMBDA,
+    "proximal_sparsity":  PROXIMAL_SPARSITY,
     "sweep_winner_config_id": int(selected["config_id"]),
     "sweep_winner_val_balacc": float(selected["best_val_balacc"]),
 }]).to_csv(os.path.join(OUT_DIR, "winning_config.csv"), index=False)
@@ -527,11 +624,17 @@ Trained {len(SEEDS)} seeds with fixed lr={LR}, batch={BATCH_SIZE},
   max_epochs={MAX_EPOCHS}, patience={PATIENCE},
   ReduceLROnPlateau(patience={SCHED_PATIENCE}, factor={SCHED_FACTOR})
 
-Concurvity regularization (Siems et al. 2023, arXiv:2305.11475):
-  lambda = {CONCURVITY_LAMBDA}
-  Objective: L_total = L_task + {CONCURVITY_LAMBDA} * R_perp
-  R_perp = (1/K) * sum_k  mean_{{i<j}} |Corr(f_{{i,k}}(X_i), f_{{j,k}}(X_j))|
-  (multiclass avg over K={N_CLASSES} classes; Pearson corr over batch dim)
+Regularization:
+  Objective: L_total = L_task + {CONCURVITY_LAMBDA} * R_perp + {SPARSITY_LAMBDA} * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = {CONCURVITY_LAMBDA}
+    R_perp = (1/K) * sum_k  mean_{{i<j}} |Corr(f_{{i,k}}(X_i), f_{{j,k}}(X_j))|
+    (multiclass avg over K={N_CLASSES} classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = {SPARSITY_LAMBDA}
+    R_sparse = sum_{{i=1}}^{{p}} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = {ZERO_THRESHOLD}
+    Sparsity method: {"proximal gradient descent — exact group zeroing (Xu et al. 2022)" if PROXIMAL_SPARSITY else "subgradient via loss term — uniform shrinkage only (not recommended)"}
 
 Test-set results (mean +/- std across seeds):
   Balanced accuracy            : {means['balanced_accuracy']:.4f} +/- {stds['balanced_accuracy']:.4f}
@@ -540,9 +643,10 @@ Test-set results (mean +/- std across seeds):
   Top-1 accuracy               : {means['top1_accuracy']:.4f} +/- {stds['top1_accuracy']:.4f}
   Multiclass AUC (OvR weighted): {means['auc_ovr_weighted']:.4f} +/- {stds['auc_ovr_weighted']:.4f}
 
-Concurvity diagnostics (at best-val epoch, mean +/- std across seeds):
-  R_perp val  : {means['r_perp_val_at_best']:.4f} +/- {stds['r_perp_val_at_best']:.4f}
-  R_perp train: {means['r_perp_train_at_best']:.4f} +/- {stds['r_perp_train_at_best']:.4f}
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : {means['r_perp_val_at_best']:.4f} +/- {stds['r_perp_val_at_best']:.4f}
+  R_perp train : {means['r_perp_train_at_best']:.4f} +/- {stds['r_perp_train_at_best']:.4f}
+  R_sparse train: {means['r_sparse_train_at_best']:.6f} +/- {stds['r_sparse_train_at_best']:.6f}
 
 Three-way comparison:
   vs v6 LR baseline  (0.555): {means['balanced_accuracy']:.4f} {_delta('balanced_accuracy', 0.555)}
