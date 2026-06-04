@@ -99,7 +99,9 @@ CONVERGENCE_EPOCH     = 30
 #   0.0 → plain NAM; loss and gradients are bit-identical to unregularized run.
 #   R_perp is always logged as a diagnostic regardless of this value.
 #   Suggested ablation values: {0.0, 0.001, 0.01, 0.1, 1.0}
-CONCURVITY_LAMBDA = 0.0
+# Default 1.0 matches the elbow from concurvity-only sweep. Override
+# to 0.0 to disable concurvity reg for ablations.
+CONCURVITY_LAMBDA = 1.0
 
 # Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
 #   R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
@@ -124,8 +126,11 @@ _parser.add_argument("--sparsity_lambda",         type=float, default=None)
 _parser.add_argument("--proximal_sparsity",       action=argparse.BooleanOptionalAction, default=None)
 _parser.add_argument("--out_dir",                type=str,   default=None)
 _parser.add_argument("--max_epochs",             type=int,   default=None)
+_parser.add_argument("--patience",               type=int,   default=None)
 _parser.add_argument("--seed",                   type=int,   default=None)
 _parser.add_argument("--skip_convergence_check", action="store_true", default=False)
+_parser.add_argument("--warm_start_checkpoint",  type=str,   default=None)
+_parser.add_argument("--fixed_lr",               action="store_true", default=False)
 _cli, _ = _parser.parse_known_args()
 if _cli.concurvity_lambda is not None:
     CONCURVITY_LAMBDA = _cli.concurvity_lambda
@@ -137,9 +142,13 @@ if _cli.out_dir is not None:
     OUT_DIR = _cli.out_dir
 if _cli.max_epochs is not None:
     MAX_EPOCHS = _cli.max_epochs
+if _cli.patience is not None:
+    PATIENCE = _cli.patience
 if _cli.seed is not None:
     SEEDS = [_cli.seed]
 SKIP_CONVERGENCE_CHECK = _cli.skip_convergence_check
+WARM_START_CHECKPOINT  = _cli.warm_start_checkpoint
+FIXED_LR               = _cli.fixed_lr
 
 # ── Device ────────────────────────────────────────────────────────────────────
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -311,6 +320,10 @@ print(f"  batch={BATCH_SIZE}  max_epochs={MAX_EPOCHS}  patience={PATIENCE}")
 print(f"  class_weight='balanced'")
 print(f"  concurvity_lambda={CONCURVITY_LAMBDA}  sparsity_lambda={SPARSITY_LAMBDA}  "
       f"proximal_sparsity={PROXIMAL_SPARSITY}")
+if WARM_START_CHECKPOINT is not None:
+    print(f"  warm_start_checkpoint={WARM_START_CHECKPOINT}")
+if FIXED_LR:
+    print(f"  fixed_lr=True  (ReduceLROnPlateau disabled)")
 print(f"{'='*65}\n")
 
 all_results = []
@@ -331,6 +344,11 @@ for seed in SEEDS:
         dropout=DROPOUT,
         concept_names=concept_names_list,
     ).to(DEVICE)
+
+    if WARM_START_CHECKPOINT is not None:
+        ws_state = torch.load(WARM_START_CHECKPOINT, map_location=DEVICE, weights_only=True)
+        model.load_state_dict(ws_state)
+        print(f"  Loaded warm-start weights from {WARM_START_CHECKPOINT}")
 
     optimizer = torch.optim.Adam(
         model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY
@@ -431,7 +449,8 @@ for seed in SEEDS:
             "r_sparse_train":   train_rsparse,
         })
 
-        scheduler.step(val_balacc)
+        if not FIXED_LR:
+            scheduler.step(val_balacc)
 
         if (epoch + 1) % verbose_every == 0:
             print(f"  Epoch {epoch+1:3d} | train_loss={train_loss:.4f} "

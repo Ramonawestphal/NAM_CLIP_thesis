@@ -10,7 +10,9 @@
       "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --concurvity_lambda 1.0 --out_dir reports/nam/sanity2_b --skip_convergence_check)",
       "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 1.0 --out_dir reports/nam/sanity2_c --skip_convergence_check)",
       "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 500.0 --out_dir reports/nam/sanity2_probe --skip_convergence_check)",
-      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 1.0 --no-proximal_sparsity --out_dir reports/nam/sanity2_d --skip_convergence_check)"
+      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 1.0 --no-proximal_sparsity --out_dir reports/nam/sanity2_d --skip_convergence_check)",
+      "Bash(python -c ' *)",
+      "Bash(python scripts/_run_production_sweeps.py)"
     ]
   }
 }

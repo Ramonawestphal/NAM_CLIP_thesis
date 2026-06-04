@@ -10,36 +10,54 @@ Trained 5 seeds with fixed lr=0.001, batch=256,
   max_epochs=100, patience=15,
   ReduceLROnPlateau(patience=5, factor=0.5)
 
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 0.0 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 0.0
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
 Test-set results (mean +/- std across seeds):
-  Balanced accuracy            : 0.5303 +/- 0.0131
-  Macro F1                     : 0.4169 +/- 0.0096
-  Weighted F1                  : 0.6267 +/- 0.0102
-  Top-1 accuracy               : 0.5829 +/- 0.0146
-  Multiclass AUC (OvR weighted): 0.8547 +/- 0.0033
+  Balanced accuracy            : 0.5144 +/- 0.0068
+  Macro F1                     : 0.3950 +/- 0.0119
+  Weighted F1                  : 0.6031 +/- 0.0088
+  Top-1 accuracy               : 0.5559 +/- 0.0111
+  Multiclass AUC (OvR weighted): 0.8405 +/- 0.0071
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1472 +/- 0.0213
+  R_perp train : 0.1107 +/- 0.0067
+  R_sparse train: 176.023604 +/- 0.425170
 
 Three-way comparison:
-  vs v6 LR baseline  (0.555): 0.5303 (-0.025)
-  vs v6 NAM Phase-1  (0.498): 0.5303 (+0.032)
-  vs v5 NAM baseline (0.540): 0.5303 (-0.010)
+  vs v6 LR baseline  (0.555): 0.5144 (-0.041)
+  vs v6 NAM Phase-1  (0.498): 0.5144 (+0.016)
+  vs v5 NAM baseline (0.540): 0.5144 (-0.026)
 
 Per-class metrics (NAM v6 final, mean across seeds):
        precision  recall  f1-score    auc  support
-nv        0.9195  0.6343    0.7504 0.8710     1337
-mel       0.2802  0.4376    0.3399 0.7604      218
-bkl       0.3779  0.4688    0.4169 0.7989      218
-bcc       0.3626  0.4760    0.4090 0.8983      100
-akiec     0.2283  0.5645    0.3234 0.8883       62
-vasc      0.3990  0.7312    0.5161 0.9775       32
-df        0.1026  0.4000    0.1625 0.8701       28
+nv        0.9158  0.5991    0.7242 0.8554     1337
+mel       0.2656  0.4569    0.3354 0.7506      218
+bkl       0.3684  0.4266    0.3920 0.7952      218
+bcc       0.3091  0.4820    0.3752 0.8670      100
+akiec     0.2254  0.5452    0.3161 0.8746       62
+vasc      0.3507  0.7125    0.4681 0.9751       32
+df        0.0969  0.3786    0.1539 0.8535       28
 
 Confusion matrix (row-normalised, seed-mean):
        akiec    bcc    bkl     df    mel     nv   vasc
-akiec  0.564  0.126  0.184  0.036  0.036  0.039  0.016
-bcc    0.172  0.476  0.068  0.102  0.066  0.064  0.052
-bkl    0.129  0.077  0.469  0.029  0.180  0.110  0.006
-df     0.129  0.057  0.071  0.400  0.050  0.157  0.136
-mel    0.100  0.053  0.195  0.029  0.438  0.162  0.023
-nv     0.036  0.033  0.080  0.055  0.147  0.634  0.014
-vasc   0.012  0.100  0.000  0.019  0.069  0.069  0.731
+akiec  0.545  0.129  0.184  0.026  0.048  0.035  0.032
+bcc    0.124  0.482  0.098  0.080  0.070  0.078  0.068
+bkl    0.131  0.105  0.427  0.025  0.201  0.106  0.006
+df     0.114  0.100  0.071  0.379  0.064  0.164  0.107
+mel    0.094  0.063  0.183  0.025  0.457  0.154  0.023
+nv     0.041  0.044  0.075  0.059  0.164  0.599  0.019
+vasc   0.000  0.138  0.000  0.000  0.075  0.075  0.712
 
 Outputs -> reports/nam/v6_final/
+
