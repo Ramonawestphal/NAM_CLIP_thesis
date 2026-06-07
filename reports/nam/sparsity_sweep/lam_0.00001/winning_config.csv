@@ -1,2 +1,0 @@
-hidden_dims,dropout,weight_decay,lr,batch_size,max_epochs,patience,sched_patience,sched_factor,concurvity_lambda,sparsity_lambda,proximal_sparsity,sweep_winner_config_id,sweep_winner_val_balacc
-"[64, 32]",0.1,1e-05,0.001,256,100,15,5,0.5,0.0,1e-05,True,9,0.6154828461976054
