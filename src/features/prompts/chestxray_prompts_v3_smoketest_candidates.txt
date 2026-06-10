@@ -1,0 +1,83 @@
+# Chest X-ray v3 Smoke-Test Candidates
+#
+# This file contains ONLY the 4 candidate phrasings for the two
+# persistently-failing concepts. It is NOT a full prompt file.
+#
+# Usage: the v3 smoke-test script encodes these 4 candidates plus the
+# 16 v2-frozen concepts (which remain unchanged), runs them on a 300-image
+# stratified subsample of the train pool, computes per-class means, and
+# reports which phrasing per concept wins. The winning phrasings are then
+# committed into chestxray_prompts_v3.txt for full extraction.
+#
+# Two phrasings per concept attack the problem from different angles:
+#   - a: contrast against normal anatomy ("replacing normal lung markings",
+#        "widened intercostal spaces")
+#   - b: contrast against the other abnormal class ("without lobar
+#        consolidation") OR pivot to a different viral feature ("air
+#        trapping")
+#
+# Strategy notes are inline as comments. Format is INI-style with
+# candidate-id suffix (_a, _b) for the smoke-test loader.
+
+
+# ============================================================
+# bilateral_interstitial_pattern candidates
+# ============================================================
+#
+# v2 result (FAIL): "fine reticular lines and ground-glass opacities
+# throughout both lungs" — argmax=normal (0.445), virus (0.418),
+# bacteria (0.379); spread 0.066 in WRONG direction.
+#
+# v2 failure mode: the encoder appears to interpret detailed pulmonary-
+# architectural language ("reticular lines", "ground-glass") as
+# "high-detail clear chest X-ray showing pulmonary architecture" —
+# which is what a normal film looks like. Architecture-positive
+# language anchors on normal.
+
+[bilateral_interstitial_pattern_a]
+# Strategy: contrast against normal lung markings explicitly.
+# "Replacing the normal lung markings" should pull the prompt away from
+# "high-detail clear film" interpretations.
+tier: 2
+t1: Chest radiograph of viral pneumonia showing diffuse hazy opacity replacing the normal lung markings throughout both lung fields
+
+[bilateral_interstitial_pattern_b]
+# Strategy: anchor against the OTHER abnormal class (bacterial) rather
+# than against normal. "Without lobar consolidation" explicitly tells
+# BiomedCLIP this is not the bacterial pattern; "widespread cloudy
+# opacification" replaces the architecture-positive vocabulary that
+# failed in v2.
+tier: 2
+t1: Chest radiograph of viral pneumonia showing widespread cloudy opacification of both lungs without lobar consolidation
+
+
+# ============================================================
+# hyperinflation candidates
+# ============================================================
+#
+# v2 result (FAIL): "overexpanded lungs with flattened diaphragm domes"
+# — argmax=normal (0.405), virus (0.393), bacteria (0.390); spread 0.015.
+# v2 made things less discriminative than v1, not more.
+#
+# v2 failure mode: pediatric chest X-rays are taken on inspiration, so
+# all of them show "expanded lungs". The relative difference between
+# normal inspiratory expansion and pathologic hyperinflation is subtle.
+# v2's "overexpanded lungs" and "flattened diaphragm" are not
+# sufficiently specific to pathology.
+
+[hyperinflation_a]
+# Strategy: name a finding that does NOT appear on normal films. Widened
+# intercostal spaces are the visible signature of pathologic
+# hyperinflation, not just inspiratory expansion. Keep "increased lung
+# volume" and "depressed diaphragms" but add the discriminating feature.
+tier: 2
+t1: Chest radiograph of viral pneumonia showing increased lung volume with depressed diaphragms and widened intercostal spaces
+
+[hyperinflation_b]
+# Strategy: abandon "hyperinflation" terminology entirely. Pivot to "air
+# trapping" — a more specifically pathologic term — paired with
+# bronchial-marking changes. Some semantic overlap with
+# peribronchial_cuffing is accepted (peribronchial_cuffing is itself a
+# knife-edge MATCH, so additional viral-tier coverage may help).
+tier: 2
+t1: Chest radiograph of viral pneumonia showing increased perihilar bronchial markings with air trapping

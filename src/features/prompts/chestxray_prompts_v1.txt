@@ -1,0 +1,160 @@
+# Chest X-ray Concept Prompts - VERSION 1 (initial draft)
+#
+# Dataset: Kermany et al. (2018) Chest X-ray Pneumonia
+#   - 5,856 paediatric chest X-rays
+#   - Binary task: pneumonia vs normal (~74% pneumonia)
+#   - Original labels also distinguish bacterial vs viral pneumonia
+#   - BiomedCLIP encoder (ViT-B/16 + PubMedBERT)
+#
+# Design parallels HAM10000 v6 (24 disease-anchored concepts in
+# "Dermoscopy of [disease] showing [feature]" format). Adapted here:
+#
+#   - Three-tier structure parallels v6 (Tier 1 = ABCD-analogue,
+#     Tier 2 = 7-point-checklist-analogue, Tier 3 = LLM-augmented + anchors).
+#
+#   - Disease anchor varies by tier purpose, following v6's logic that anchors
+#     should match the concept's discriminative target:
+#       * Tier 1 (general pneumonia signs):
+#           "Chest radiograph showing [feature]"
+#         Broad-target signs that appear across pneumonia subtypes; not
+#         anchored to any single subtype because they don't discriminate.
+#       * Tier 2 (subtype-discriminative):
+#           "Chest radiograph of bacterial/viral pneumonia showing [feature]"
+#         Disease-anchored to the subtype the feature is supposed to indicate.
+#         Direct parallel to v6 anchoring "blue-grey ovoid nests" on basal cell
+#         carcinoma and "milia-like cysts" on seborrhoeic keratosis.
+#       * Tier 3 (normal anchor / structural):
+#           "Chest radiograph of normal lungs showing [feature]"
+#         Negative-class anchor, parallels v6's healthy_skin concept.
+#
+#   - Number of concepts: 18 (matches the "~16-20" target; smaller than
+#     HAM10000's 24 because there are fewer classes to anchor).
+#
+#   - "Pediatric" is deliberately NOT in the anchor wording. Rationale: PubMed
+#     dermoscopy and radiology captions overwhelmingly use generic adult-style
+#     phrasing; BiomedCLIP's text encoder will have stronger embeddings for
+#     "Chest radiograph showing consolidation" than for the rarer phrasing
+#     "Pediatric chest radiograph showing consolidation". This is a design
+#     decision matching the v5_biomedclip → v6 finding that PubMed-style
+#     phrasing improves alignment.
+#
+#   - Expected correlation structure (basis for the input-correlation-predicts-
+#     sparsity-selection hypothesis):
+#       * Consolidation-block (Tier 1 + Tier 2 bacterial concepts) should
+#         show high pairwise r, since all describe the same physical finding
+#         from different angles.
+#       * Interstitial-block (Tier 2 viral concepts) should show high pairwise
+#         r within block.
+#       * Pleural effusion, hyperinflation, and the Tier 3 anchors should be
+#         more independent.
+#     Pre-registered prediction: under group sparsity, each correlated block
+#     collapses to ~1-2 surviving concepts; independent concepts survive at
+#     lower lambda_s.
+#
+# Format mirrors v6: each concept has one prompt labelled t1 for backward
+# compatibility with prompt_loader.py.
+
+
+# ============================================================
+# TIER 1: GENERAL RADIOLOGIC SIGNS OF PNEUMONIA
+# Broad-target features appearing across pneumonia subtypes.
+# Anchor: "Chest radiograph showing [feature]"
+# ============================================================
+
+[consolidation]
+tier: 1
+t1: Chest radiograph showing pulmonary consolidation
+
+[air_bronchograms]
+tier: 1
+t1: Chest radiograph showing air bronchograms within an opacity
+
+[pleural_effusion]
+tier: 1
+t1: Chest radiograph showing a pleural effusion with blunting of the costophrenic angle
+
+[focal_opacity]
+tier: 1
+t1: Chest radiograph showing a focal area of increased opacity
+
+[silhouette_sign]
+tier: 1
+t1: Chest radiograph showing loss of the cardiac or diaphragmatic silhouette
+
+[patchy_infiltrate]
+tier: 1
+t1: Chest radiograph showing patchy infiltrates in the lung parenchyma
+
+
+# ============================================================
+# TIER 2A: BACTERIAL-PNEUMONIA-DISCRIMINATIVE CONCEPTS
+# Anchor: "Chest radiograph of bacterial pneumonia showing [feature]"
+# Pattern: lobar / dense / focal / parapneumonic effusion.
+# ============================================================
+
+[lobar_consolidation]
+tier: 2
+t1: Chest radiograph of bacterial pneumonia showing dense lobar consolidation
+
+[dense_segmental_opacity]
+tier: 2
+t1: Chest radiograph of bacterial pneumonia showing a dense segmental opacity
+
+[parapneumonic_effusion]
+tier: 2
+t1: Chest radiograph of bacterial pneumonia showing a parapneumonic pleural effusion
+
+[round_pneumonia]
+tier: 2
+t1: Chest radiograph of bacterial pneumonia showing a rounded well-circumscribed opacity
+
+
+# ============================================================
+# TIER 2B: VIRAL-PNEUMONIA-DISCRIMINATIVE CONCEPTS
+# Anchor: "Chest radiograph of viral pneumonia showing [feature]"
+# Pattern: bilateral / interstitial / peribronchial / diffuse.
+# ============================================================
+
+[bilateral_interstitial_pattern]
+tier: 2
+t1: Chest radiograph of viral pneumonia showing a bilateral interstitial pattern
+
+[peribronchial_cuffing]
+tier: 2
+t1: Chest radiograph of viral pneumonia showing peribronchial cuffing and thickening
+
+[perihilar_infiltrates]
+tier: 2
+t1: Chest radiograph of viral pneumonia showing perihilar infiltrates
+
+[hyperinflation]
+tier: 2
+t1: Chest radiograph of viral pneumonia showing hyperinflation of the lungs
+
+
+# ============================================================
+# TIER 3: NORMAL ANCHOR AND STRUCTURAL REFERENCE CONCEPTS
+# Anchor: "Chest radiograph of normal lungs showing [feature]"
+# Parallels v6's healthy_skin concept; spans negative-class features
+# that should activate on normal films.
+# ============================================================
+
+[clear_lung_fields]
+tier: 3
+t1: Chest radiograph of normal lungs showing clear and well-aerated lung fields
+
+[sharp_costophrenic_angles]
+tier: 3
+t1: Chest radiograph of normal lungs showing sharp costophrenic angles
+
+[normal_cardiac_silhouette]
+tier: 3
+t1: Chest radiograph of normal lungs showing a normal cardiac silhouette
+
+[no_focal_opacity]
+tier: 3
+t1: Chest radiograph of normal lungs showing no focal opacity or consolidation
+
+[symmetric_lung_aeration]
+tier: 3
+t1: Chest radiograph of normal lungs showing symmetric aeration of both lungs
