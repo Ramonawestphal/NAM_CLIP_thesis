@@ -23,7 +23,10 @@
       "Bash(python -c \"import shutil; t,u,f=shutil.disk_usage\\('.'\\); print\\(f'Total: {t//2**30} GB, Used: {u//2**30} GB, Free: {f//2**30} GB'\\)\")",
       "Bash(python -c \"import torch; print\\('torch', torch.__version__\\); import numpy; print\\('numpy', numpy.__version__\\); import sklearn; print\\('sklearn', sklearn.__version__\\); import pandas; print\\('pandas', pandas.__version__\\)\")",
       "Bash(python scripts/v7/run_sparsity_sweep.py --condition sparsity_only --seeds 42 43 44 45 46 --out_root results/v7/sparsity_sweep)",
-      "Bash(python scripts/v7/run_sparsity_sweep.py --condition sparsity_concurvity --seeds 42 43 44 45 46 --out_root results/v7/sparsity_sweep)"
+      "Bash(python scripts/v7/run_sparsity_sweep.py --condition sparsity_concurvity --seeds 42 43 44 45 46 --out_root results/v7/sparsity_sweep)",
+      "Bash(pip install *)",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(python -c \"import xgboost; print\\(xgboost.__version__\\)\")"
     ]
   }
 }
