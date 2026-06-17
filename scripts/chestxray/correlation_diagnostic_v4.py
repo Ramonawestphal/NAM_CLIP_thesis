@@ -162,7 +162,14 @@ def plot_heatmap(
 
     ax.set_title("Chest X-ray BiomedCLIP Concept Correlation Matrix — v4 (train pool)",
                  fontsize=11, pad=12)
-    plt.tight_layout()
+    i_idx, j_idx = np.triu_indices(n, k=1)
+    mean_abs_r = float(np.mean(np.abs(corr[i_idx, j_idx])))
+    fig.text(
+        0.5, 0.01,
+        f"Mean |r| off-diagonal: {mean_abs_r:.3f}.",
+        ha="center", fontsize=9, color="#444444",
+    )
+    plt.tight_layout(rect=[0, 0.03, 1, 1])
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"  Heatmap saved → {out_path.relative_to(_ROOT)}")

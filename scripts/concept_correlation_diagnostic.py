@@ -208,8 +208,7 @@ ax.set_title(
 )
 fig.text(
     0.5, 0.01,
-    f"Mean |r| off-diagonal: {mean_abs:.3f}.  "
-    "Computed on z-scored features used by NAM v6 training.",
+    f"Mean |r| off-diagonal: {mean_abs:.3f}.",
     ha="center", fontsize=9, color="#444444"
 )
 
