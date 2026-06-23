@@ -1,0 +1,14 @@
+{
+  "condition": "sparsity_conc",
+  "concurvity_lambda": 3.0,
+  "dense_val_balacc": 0.7330553031054925,
+  "dense_r_perp": 0.10737093538045883,
+  "hidden_dims": [
+    64,
+    32
+  ],
+  "dropout": 0.1,
+  "weight_decay": 0.0001,
+  "seed": 42,
+  "timestamp": "2026-06-10T12:29:00.942866+00:00"
+}

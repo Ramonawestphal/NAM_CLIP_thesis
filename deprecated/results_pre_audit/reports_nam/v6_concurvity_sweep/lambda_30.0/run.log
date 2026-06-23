@@ -1,0 +1,94 @@
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=3.2414 val_loss=1.4896 val_balacc=0.4659 lr=1.00e-03
+  Epoch  20 | train_loss=3.1452 val_loss=1.4428 val_balacc=0.4852 lr=5.00e-04
+  Epoch  30 | train_loss=3.0889 val_loss=1.4037 val_balacc=0.4728 lr=5.00e-04
+  Epoch  40 | train_loss=3.0328 val_loss=1.3947 val_balacc=0.5015 lr=2.50e-04
+  Epoch  50 | train_loss=3.0329 val_loss=1.3949 val_balacc=0.4913 lr=1.25e-04
+  Early stop at epoch 55 (best epoch 40, val_balacc=0.5015)
+  Test  bal_acc=0.4634  macro_f1=0.3171  AUC=0.7649  R_perp_val@best=0.0961
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Concurvity regularization (Siems et al. 2023, arXiv:2305.11475):
+  lambda = 30.0
+  Objective: L_total = L_task + 30.0 * R_perp
+  R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+  (multiclass avg over K=7 classes; Pearson corr over batch dim)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.4634 +/- nan
+  Macro F1                     : 0.3171 +/- nan
+  Weighted F1                  : 0.4980 +/- nan
+  Top-1 accuracy               : 0.4416 +/- nan
+  Multiclass AUC (OvR weighted): 0.7649 +/- nan
+
+Concurvity diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val  : 0.0961 +/- nan
+  R_perp train: 0.0558 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.4634 (-0.092)
+  vs v6 NAM Phase-1  (0.498): 0.4634 (-0.035)
+  vs v5 NAM baseline (0.540): 0.4634 (-0.077)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.8634  0.4540    0.5951 0.7738     1337
+mel       0.2524  0.4817    0.3312 0.7406      218
+bkl       0.3602  0.3486    0.3543 0.7238      218
+bcc       0.1472  0.2900    0.1953 0.7300      100
+akiec     0.1238  0.4194    0.1912 0.7315       62
+vasc      0.2857  0.7500    0.4138 0.9615       32
+df        0.0805  0.5000    0.1386 0.8244       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.419  0.177  0.177  0.048  0.097  0.065  0.016
+bcc    0.130  0.290  0.110  0.170  0.120  0.130  0.050
+bkl    0.083  0.151  0.349  0.023  0.206  0.174  0.014
+df     0.107  0.107  0.036  0.500  0.036  0.143  0.071
+mel    0.055  0.092  0.151  0.028  0.482  0.165  0.028
+nv     0.102  0.075  0.059  0.095  0.182  0.454  0.032
+vasc   0.031  0.031  0.000  0.062  0.094  0.031  0.750
+
+Outputs -> reports\nam\v6_concurvity_sweep\lambda_30.0/
+
+Done.

@@ -1,0 +1,21 @@
+{
+  "condition": "sparsity_only",
+  "seeds_run": [
+    42
+  ],
+  "n_steps_per_seed": [
+    100
+  ],
+  "dense_val_balacc": [
+    0.6129831038022565
+  ],
+  "elapsed_min_per_seed": [
+    24.986008989810944
+  ],
+  "avg_sec_per_step": [
+    14.977266390323638
+  ],
+  "total_elapsed_min": 26.179692343870798,
+  "budget_exceeded": false,
+  "completed_at": "2026-06-05T19:43:35.126841+00:00"
+}

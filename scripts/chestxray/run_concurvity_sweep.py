@@ -1,7 +1,7 @@
 """
 Concurvity lambda sweep — chest X-ray three-way task (STEP 3).
 
-Mirrors scripts/v7/run_concurvity_sweep.py for the chest X-ray dataset
+Mirrors scripts/HAM10000/run_concurvity_sweep.py for the chest X-ray dataset
 (Normal / Bacteria / Virus, 3 classes, 17 features, Config 10 architecture).
 Single seed (42) across 10 concurvity lambdas.  Val-only selection; test
 metrics logged per lambda for downstream reporting (test_set_touched=True).

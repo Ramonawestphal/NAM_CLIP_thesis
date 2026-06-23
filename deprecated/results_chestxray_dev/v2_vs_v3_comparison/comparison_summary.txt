@@ -1,0 +1,64 @@
+======================================================================
+V2 vs V3 COMPARISON SUMMARY
+======================================================================
+
+SECTION 1 — HEADLINE COUNTS
+  v2: 16/18 MATCH   v3: 17/18 MATCH
+  Of 2 REVISED concepts:
+    REVISED-FIXED           : 1
+    REVISED-PERSISTENT-FAIL : 1
+    REVISED-REGRESSED       : 0
+  Of 16 UNCHANGED (frozen) concepts:
+    UNCHANGED-STILL-MATCH   : 16  (expected 16)
+  Viral tier (T2B) v3 discrimination: 3/4 MATCH
+
+SECTION 2 — PER-REVISED-CONCEPT COMPARISON
+
+  [bilateral_interstitial_pattern]  [T2B-virus]  → FIXED
+    v2 prompt: Chest radiograph of viral pneumonia showing fine reticular lines and ground-glass opacities throughout both lungs
+    v3 prompt: Chest radiograph of viral pneumonia showing widespread cloudy opacification of both lungs without lobar consolidation
+    v2 means: normal=0.4451  bacteria=0.3790  virus=0.4184  argmax=normal  spread=0.0661
+    v3 means: normal=0.3974  bacteria=0.4002  virus=0.4030  argmax=virus  spread=0.0056
+    spread change: -0.0605
+
+  [hyperinflation]  [T2B-virus]  → PERSISTENT-FAIL
+    v2 prompt: Chest radiograph of viral pneumonia showing overexpanded lungs with flattened diaphragm domes
+    v3 prompt: Chest radiograph of viral pneumonia showing increased lung volume with depressed diaphragms and widened intercostal spaces
+    v2 means: normal=0.4045  bacteria=0.3896  virus=0.3931  argmax=normal  spread=0.0149
+    v3 means: normal=0.4132  bacteria=0.4126  virus=0.4124  argmax=normal  spread=0.0008
+    spread change: -0.0140
+
+SECTION 3 — DROPPED CONCEPTS
+  None. v3 drops no concepts (no_focal_opacity was already dropped in v2).
+
+SECTION 4 — CORRELATION STRUCTURE COMPARISON
+  Mean |r| (all pairs):       v2=0.4210  v3=0.4075  Δ=-0.0134
+  Within-block mean |r|:
+    consolidation_block:  v2=0.6342  v3=0.6342
+    interstitial_block:   v2=0.7678  v3=0.7490
+    normal_anchor_block:  v2=0.9003  v3=0.9003  (4 members both)
+  Between-block mean |r| (consolidation × interstitial):
+    v2=0.3303  v3=0.4305
+  Anchor×pneumonia signed r:
+    anchor×consolidation: v2=-0.2711  v3=-0.2711
+    anchor×interstitial:  v2=+0.5796  v3=+0.3489
+  Expected: within-block correlations persist (no structure engineering);
+    only 2 viral-tier prompts changed, so blocks should be largely stable.
+
+SECTION 5 — PRE-REGISTERED HYPOTHESIS FOLLOW-UP
+  (H1-H5 pre-registered on v1; v3 reported as follow-up, not fresh pre-registration)
+  H1: Within consolidation_block, mean |r| > 0.7
+      v2: FAIL   v3: FAIL
+  H2: Within interstitial_block, mean |r| > 0.7
+      v2: PASS   v3: PASS
+  H3: Between consolidation & interstitial, mean |r| < within-block |r| of either
+      v2: PASS   v3: PASS
+  H4: normal_anchor_block correlates negatively (signed r < 0) with both pneumonia blocks
+      v2: FAIL   v3: FAIL
+  H5: Aggregate mean |r| over all pairs falls in [0.3, 0.6]
+      v2: PASS   v3: PASS
+
+SECTION 6 — RECOMMENDATION
+  v3 partially fixes the viral tier (1/2). Per the deferred decision
+  rule, escalate to Ramona for the drop/keep call on the remaining
+  failure.

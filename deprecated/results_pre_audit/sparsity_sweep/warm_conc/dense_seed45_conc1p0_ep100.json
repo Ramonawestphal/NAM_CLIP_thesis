@@ -1,0 +1,20 @@
+{
+  "dense_val_balacc": 0.6000635763960336,
+  "dense_val_auc": 0.85246189472619,
+  "hidden_dims": [
+    64,
+    32
+  ],
+  "dropout": 0.1,
+  "weight_decay": 1e-05,
+  "lr": 0.001,
+  "batch_size": 256,
+  "max_dense_epochs": 100,
+  "dense_patience": 15,
+  "sched_patience": 5,
+  "sched_factor": 0.5,
+  "concurvity_lambda": 1.0,
+  "seed": 45,
+  "git_sha": "84f4bea",
+  "timestamp": "2026-05-29T17:07:17.054403+00:00"
+}

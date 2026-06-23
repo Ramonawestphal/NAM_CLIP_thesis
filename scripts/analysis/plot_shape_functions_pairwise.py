@@ -237,7 +237,9 @@ def draw_pairwise_panel(
     plt.setp(ax_main.get_xticklabels(), visible=False)
 
     bins = 30 if small else 40
-    ax_hist.hist(x_hist, bins=bins, color="#404040", alpha=HIST_ALPHA)
+    ax_hist.hist(x_hist, bins=bins, color="#404040", alpha=HIST_ALPHA,
+                 range=(common_grid[0], common_grid[-1]))
+    ax_main.set_xlim(common_grid[0], common_grid[-1])
     xlabel = concept_name.replace("_", " ") + ("" if small else " (scaled)")
     ax_hist.set_xlabel(xlabel, fontsize=fs_a)
     ax_hist.set_ylabel("n", fontsize=fs_r if small else 8)

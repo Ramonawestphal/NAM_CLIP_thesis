@@ -1,0 +1,26 @@
+{
+  "condition": "sparsity_only",
+  "concurvity_lambda": 0.0,
+  "seeds": [
+    42
+  ],
+  "hidden_dims": [
+    64,
+    32
+  ],
+  "dropout": 0.1,
+  "weight_decay": 0.0001,
+  "lambda_0": 0.001,
+  "epsilon": 0.025,
+  "max_lambda": 1000.0,
+  "max_lambda_steps": 100,
+  "max_dense_epochs": 100,
+  "max_warm_epochs": 30,
+  "warm_patience": 6,
+  "budget_hours": 2.0,
+  "warmup_epochs": 0,
+  "device": "cpu",
+  "winner_json": "results/v7/architecture_search_cv/winner.json",
+  "started_at": "2026-06-05T19:17:24.321998+00:00",
+  "schedule_note": "lambda_t = 1.000e-03 * 1.0250^t; at t=99: approx 1.153e-02"
+}

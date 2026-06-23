@@ -1,0 +1,68 @@
+======================================================================
+CHEST X-RAY NAM ARCHITECTURE SELECTION — SUMMARY (v7 parity)
+======================================================================
+
+1. v7 training config used verbatim (scripts/v7/_common.py):
+   Adam(lr=1e-3, weight_decay=config); ReduceLROnPlateau(mode='max',
+   factor=0.5, patience=5, min_lr=1e-6) on val balanced accuracy;
+   CrossEntropyLoss with balanced class weights; batch=256;
+   max_epochs=80, patience=15; single seed 42.
+   Only divergence: num_classes=2 (binary task).
+
+2. The 12 configs evaluated (v7 SWEEP_GRID):
+   config  1: hidden=[32, 16], dropout=0.1, weight_decay=1e-05
+   config  2: hidden=[32, 16], dropout=0.1, weight_decay=1e-04
+   config  3: hidden=[32, 16], dropout=0.2, weight_decay=1e-05
+   config  4: hidden=[32, 16], dropout=0.2, weight_decay=1e-04
+   config  5: hidden=[32, 32], dropout=0.1, weight_decay=1e-05
+   config  6: hidden=[32, 32], dropout=0.1, weight_decay=1e-04
+   config  7: hidden=[32, 32], dropout=0.2, weight_decay=1e-05
+   config  8: hidden=[32, 32], dropout=0.2, weight_decay=1e-04
+   config  9: hidden=[64, 32], dropout=0.1, weight_decay=1e-05
+   config 10: hidden=[64, 32], dropout=0.1, weight_decay=1e-04
+   config 11: hidden=[64, 32], dropout=0.2, weight_decay=1e-05
+   config 12: hidden=[64, 32], dropout=0.2, weight_decay=1e-04
+
+3. Per-config aggregates (sorted by mean val balanced accuracy):
+ config_id   hidden  dropout  weight_decay  mean_val_balacc  std_val_balacc  mean_val_auc  std_val_auc  n_folds
+         6 [32, 32]      0.1       0.00010           0.9325          0.0061        0.9799       0.0025        5
+        10 [64, 32]      0.1       0.00010           0.9323          0.0046        0.9803       0.0024        5
+         9 [64, 32]      0.1       0.00001           0.9320          0.0040        0.9797       0.0021        5
+        11 [64, 32]      0.2       0.00001           0.9319          0.0049        0.9794       0.0035        5
+         5 [32, 32]      0.1       0.00001           0.9315          0.0070        0.9797       0.0027        5
+        12 [64, 32]      0.2       0.00010           0.9312          0.0050        0.9790       0.0034        5
+         1 [32, 16]      0.1       0.00001           0.9310          0.0061        0.9785       0.0027        5
+         8 [32, 32]      0.2       0.00010           0.9309          0.0045        0.9789       0.0022        5
+         7 [32, 32]      0.2       0.00001           0.9303          0.0046        0.9785       0.0022        5
+         2 [32, 16]      0.1       0.00010           0.9296          0.0050        0.9783       0.0026        5
+         3 [32, 16]      0.2       0.00001           0.9280          0.0057        0.9766       0.0029        5
+         4 [32, 16]      0.2       0.00010           0.9278          0.0043        0.9767       0.0028        5
+
+4. Winner:
+   config 6: hidden=[32, 32], dropout=0.1, weight_decay=1e-04
+   mean val balacc = 0.9325 ± 0.0061
+   mean val AUC    = 0.9799 ± 0.0025
+   runner-up: config 10 (balacc 0.9323); margin = 0.0002
+
+5. Per-fold val class proportions (pneumonia fraction):
+   fold 0: 0.729 pneumonia
+   fold 1: 0.729 pneumonia
+   fold 2: 0.728 pneumonia
+   fold 3: 0.728 pneumonia
+   fold 4: 0.729 pneumonia
+
+6. Per-config mean val AUC alongside balanced accuracy:
+   config  6: balacc=0.9325  auc=0.9799
+   config 10: balacc=0.9323  auc=0.9803
+   config  9: balacc=0.9320  auc=0.9797
+   config 11: balacc=0.9319  auc=0.9794
+   config  5: balacc=0.9315  auc=0.9797
+   config 12: balacc=0.9312  auc=0.9790
+   config  1: balacc=0.9310  auc=0.9785
+   config  8: balacc=0.9309  auc=0.9789
+   config  7: balacc=0.9303  auc=0.9785
+   config  2: balacc=0.9296  auc=0.9783
+   config  3: balacc=0.9280  auc=0.9766
+   config  4: balacc=0.9278  auc=0.9767
+
+7. Leakage safeguards: all six assertions passed before training.

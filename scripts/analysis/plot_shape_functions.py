@@ -34,15 +34,15 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from src.models.nam_multiclass import NAMMulticlass
-from scripts.v7._common import make_fixed_val_split
+from scripts.HAM10000._common import make_fixed_val_split
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 SEEDS      = [42, 43, 44, 45, 46]
 OUT_DIR    = _ROOT / "results" / "analysis" / "shape_function_plots"
 R2_CSV     = _ROOT / "results" / "analysis" / "nonlinearity" / "shape_function_r2.csv"
 N_GRID     = 200
-GRID_PCTLO = 0.5
-GRID_PCTHI = 99.5
+GRID_PCTLO = 2.0
+GRID_PCTHI = 98.0
 
 SEED_ALPHA   = 0.30;  SEED_LW    = 1.0
 MEAN_LW      = 2.50
@@ -57,7 +57,7 @@ DATASET_CFGS: Dict[str, dict] = {
         "name":           "ham10000",
         "features_path":  _ROOT / "data/features/biomedclip/ham10000_concept_scores_v6.npz",
         "splits_path":    _ROOT / "data/splits/train_test_lesion_split.npz",
-        "checkpoint_dir": _ROOT / "results/ham10000/primary_checkpoints",
+        "checkpoint_dir": _ROOT / "results/HAM10000/primary_checkpoints",
         "n_features":     24,
         "num_classes":    7,
         "hidden_dims":    (64, 32),
@@ -285,7 +285,9 @@ def draw_panel(
     plt.setp(ax_main.get_xticklabels(), visible=False)
 
     bins    = 30 if small else 40
-    ax_hist.hist(x_hist, bins=bins, color="#404040", alpha=HIST_ALPHA)
+    ax_hist.hist(x_hist, bins=bins, color="#404040", alpha=HIST_ALPHA,
+                 range=(common_grid[0], common_grid[-1]))
+    ax_main.set_xlim(common_grid[0], common_grid[-1])
     xlabel  = concept_name.replace("_", " ") + ("" if small else " (scaled)")
     ax_hist.set_xlabel(xlabel, fontsize=fs_a)
     ax_hist.set_ylabel("n", fontsize=fs_r if small else 8)

@@ -1,0 +1,18 @@
+{
+  "baseline_val_balacc": 0.6143191590984721,
+  "baseline_val_auc": 0.8650340253492719,
+  "baseline_r_perp": 0.3170022964477539,
+  "hidden_dims": [
+    64,
+    32
+  ],
+  "dropout": 0.1,
+  "weight_decay": 1e-05,
+  "lr": 0.001,
+  "batch_size": 256,
+  "max_dense_epochs": 100,
+  "dense_patience": 15,
+  "seed": 42,
+  "git_sha": "84f4bea",
+  "timestamp": "2026-05-29T08:10:48.854342+00:00"
+}

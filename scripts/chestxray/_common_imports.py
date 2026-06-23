@@ -1,13 +1,13 @@
 """
 v7-parity Step 1: thin import shim re-exporting v7 training helpers.
 
-scripts/v7/_common.py is importable directly from the project root (Python
+scripts/HAM10000/_common.py is importable directly from the project root (Python
 namespace packages), so the chest X-ray architecture-selection scripts reuse the
 EXACT v7 helpers without copying or modifying them. This guarantees that the
 training mechanics (optimiser, scheduler, early stopping, checkpointing,
 seeding) are bit-for-bit the v7 protocol.
 
-If scripts/v7/_common.py ever stops being importable, replace this shim with a
+If scripts/HAM10000/_common.py ever stops being importable, replace this shim with a
 verbatim copy at scripts/chestxray/_v7_helpers.py (see the task spec); do NOT
 edit _common.py.
 

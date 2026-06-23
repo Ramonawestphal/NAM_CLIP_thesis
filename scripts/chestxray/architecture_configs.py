@@ -1,7 +1,7 @@
 """
 v7-parity Step 2: the architecture search grid.
 
-Uses v7's EXACT 12-config SWEEP_GRID (scripts/v7/_common.py lines 49-56):
+Uses v7's EXACT 12-config SWEEP_GRID (scripts/HAM10000/_common.py lines 49-56):
     hidden_dims  in {(32,16), (32,32), (64,32)}
     dropout      in {0.10, 0.20}
     weight_decay in {1e-5, 1e-4}
@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import itertools
 
-# Identical to scripts/v7/_common.py SWEEP_GRID (cross-checked against the
+# Identical to scripts/HAM10000/_common.py SWEEP_GRID (cross-checked against the
 # v7 source; do NOT change without re-checking the v7 grid for parity).
 SWEEP_GRID = list(itertools.product(
     [(32, 16), (32, 32), (64, 32)],   # hidden dims

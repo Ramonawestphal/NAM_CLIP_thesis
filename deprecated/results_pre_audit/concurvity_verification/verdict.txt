@@ -1,0 +1,24 @@
+Step 1 verification verdict — warm-start vs cold-start concurvity (seed 42)
+============================================================================
+
+The warm-start concurvity path (lambda_c = 0.001 → 95, 83 steps, seed 42)
+identifies a broad operating region across lambda_c ∈ [0.3, 3] in which
+val AUC remains close to the unregularised baseline while R_perp is
+substantially reduced.
+
+At the cold-start choice (lambda_c = 1.0):
+  val AUC          = 0.850  (dense baseline 0.865, cost = 0.015)
+  R_perp           = 0.1121  (65% reduction from dense baseline 0.317)
+
+The cold-start concurvity sweep (Siems et al. 2023 criterion) reported
+"~60% R_perp reduction at minimal accuracy cost" at lambda_c = 1.0.
+The warm-start path achieves 65% R_perp reduction at the same lambda,
+which is quantitatively consistent within step-to-step noise.
+
+The cold-start choice lambda_c = 1.0 lies inside the warm-start operating
+region [0.3, 3]: both approaches identify the same broad plateau of
+favourable AUC / R_perp tradeoff.
+
+Conclusion: warm-start and cold-start AGREE on the concurvity regularisation
+strength.  lambda_c = 1.0 is confirmed for the sparsity+concurvity condition
+in the production 5-seed sweep.

@@ -1,0 +1,5 @@
+condition,lambda_s,lambda_c,n_active_mean,n_active_std,auc_weighted_mean,auc_weighted_std,balanced_acc_mean,balanced_acc_std,R_perp_mean,R_perp_std,eliminated_concepts
+plain_nam,0.0,0.0,24.0,0.0,0.8547,0.0029,0.5303,0.0117,0.3218,0.0083,
+concurvity_only_lc1,0.0,1.0,24.0,0.0,0.8405,0.0064,0.5144,0.0061,0.1472,0.019,
+sparsity_only_lc0_warmft,23.7,0.0,11.4,1.85,0.7748,0.0059,0.4406,0.0074,0.0767,0.0266,border_irregularity;blue_white_veil;atypical_vascular_pattern;irregular_streaks;irregular_pigmentation;irregular_dots_globules;regression_structures;symmetric_uniform;arborizing_vessels;blue_grey_ovoid_nests;strawberry_pattern;healthy_skin
+sparsity_conc_lc1_warmft,12.0,1.0,11.0,1.41,0.8121,0.0049,0.4806,0.0052,0.0445,0.0135,asymmetry;border_irregularity;blue_white_veil;atypical_vascular_pattern;irregular_streaks;irregular_pigmentation;irregular_dots_globules;regression_structures;symmetric_uniform;arborizing_vessels;strawberry_pattern;milia_like_cysts;healthy_skin

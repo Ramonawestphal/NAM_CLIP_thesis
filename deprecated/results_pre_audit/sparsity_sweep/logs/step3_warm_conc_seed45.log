@@ -1,0 +1,87 @@
+WARNING: CUDA not available — running on CPU. Expect ~10–30 min total on this hardware.
+Loading data...
+  train:  6429  val:  1591  test:  1995
+Loading sweep hyperparams (config 9)...
+  hidden=[64, 32]  dropout=0.1  wd=1e-05
+[dense] Training dense model (seed=45, concurvity_lambda=1.0) ...
+[dense] Early stop at epoch 37  best val_balacc=0.6001
+[dense] Done.  val_balacc=0.6001  val_auc=0.8525  ckpt=results/sparsity_sweep/warm_conc\dense_seed45_conc1p0_ep100.pt
+[path]  Lambda schedule: 83 steps  1.000e-02 → 9.489e+02
+  step  10  lambda=3.5179e-02  n_active=24  val_balacc=0.5521  val_auc=0.8558  epochs=33
+  step  20  lambda=1.4232e-01  n_active=24  val_balacc=0.5271  val_auc=0.8504  epochs=28
+  step  30  lambda=5.7575e-01  n_active=24  val_balacc=0.5175  val_auc=0.8472  epochs=14
+  step  40  lambda=2.3292e+00  n_active=24  val_balacc=0.5692  val_auc=0.8537  epochs=37
+  step  43  lambda=3.5425e+00  n_active=23  val_balacc=0.5786  val_auc=0.8539  epochs=33  ELIMINATED: ['irregular_dots_globules']
+  step  45  lambda=4.6850e+00  n_active=22  val_balacc=0.5893  val_auc=0.8514  epochs=29  ELIMINATED: ['border_irregularity']
+  step  46  lambda=5.3877e+00  n_active=21  val_balacc=0.5807  val_auc=0.8487  epochs=11  ELIMINATED: ['symmetric_uniform']
+  step  47  lambda=6.1958e+00  n_active=19  val_balacc=0.5611  val_auc=0.8454  epochs=36  ELIMINATED: ['atypical_vascular_pattern', 'regression_structures']
+  step  48  lambda=7.1252e+00  n_active=18  val_balacc=0.5630  val_auc=0.8395  epochs=12  ELIMINATED: ['irregular_streaks']
+  step  49  lambda=8.1940e+00  n_active=17  val_balacc=0.5322  val_auc=0.8379  epochs=11  ELIMINATED: ['healthy_skin']
+  step  50  lambda=9.4231e+00  n_active=14  val_balacc=0.5320  val_auc=0.8320  epochs=12  ELIMINATED: ['asymmetry', 'irregular_pigmentation', 'strawberry_pattern']
+  step  51  lambda=1.0837e+01  n_active=10  val_balacc=0.5355  val_auc=0.8278  epochs=39  ELIMINATED: ['blue_white_veil', 'arborizing_vessels', 'comedo_like_openings', 'cerebriform_surface']
+  step  54  lambda=1.6481e+01  n_active= 9  val_balacc=0.5321  val_auc=0.8155  epochs=11  ELIMINATED: ['colour_variation']
+  step  56  lambda=2.1796e+01  n_active= 8  val_balacc=0.5236  val_auc=0.7793  epochs=11  ELIMINATED: ['blue_grey_ovoid_nests']
+  step  57  lambda=2.5066e+01  n_active= 7  val_balacc=0.5054  val_auc=0.7553  epochs=11  ELIMINATED: ['ulceration']
+  step  59  lambda=3.3149e+01  n_active= 6  val_balacc=0.2939  val_auc=0.6335  epochs=11  ELIMINATED: ['red_lacunae']
+  step  60  lambda=3.8122e+01  n_active= 1  val_balacc=0.1429  val_auc=0.6081  epochs=11  ELIMINATED: ['diameter_large', 'atypical_pigment_network', 'scaly_surface', 'milia_like_cysts', 'central_white_patch']
+  step  61  lambda=4.3840e+01  n_active= 0  val_balacc=0.1429  val_auc=0.5000  epochs=50  ELIMINATED: ['reticular_network']
+[path]  All 24 subnets zeroed at lambda=4.3840e+01. Stopping.
+[plot]  Saved: results/sparsity_sweep/warm_conc\path_seed45.png
+
+--------------------------------------------------------------------------------
+  Regularization path — subsample (seed=45, 61 total steps)
+  Dense baseline: val_balacc=0.6001  val_auc=0.8525
+--------------------------------------------------------------------------------
+      lambda  n_active  val_bal_acc   val_auc  concepts_just_eliminated
+--------------------------------------------------------------------------------
+  1.0000e-02        24       0.6006    0.8562  
+  1.5209e-02        24       0.5830    0.8580  
+  2.3131e-02        24       0.5692    0.8500  
+  3.5179e-02        24       0.5521    0.8558  
+  6.1528e-02        24       0.5488    0.8531  
+  9.3576e-02        24       0.5519    0.8523  
+  1.4232e-01        24       0.5271    0.8504  
+  2.1645e-01        24       0.5310    0.8523  
+  3.2919e-01        24       0.5305    0.8496  
+  5.0066e-01        24       0.5351    0.8472  
+  8.7565e-01        24       0.5255    0.8504  
+  1.3318e+00        24       0.5344    0.8512  
+  2.0254e+00        24       0.5458    0.8545  
+  3.0804e+00        24       0.5781    0.8541  
+  4.6850e+00        22       0.5893    0.8514  border_irregularity
+  7.1252e+00        18       0.5630    0.8395  irregular_streaks
+  1.2462e+01        10       0.5381    0.8259  
+  1.8953e+01         9       0.5270    0.8033  
+  2.8826e+01         7       0.4995    0.7382  
+  4.3840e+01         0       0.1429    0.5000  reticular_network
+--------------------------------------------------------------------------------
+
+Elimination order (24 of 24 concepts dropped):
+order        lambda  concept
+----------------------------------------
+    1    3.5425e+00  irregular_dots_globules
+    2    4.6850e+00  border_irregularity
+    3    5.3877e+00  symmetric_uniform
+    4    6.1958e+00  atypical_vascular_pattern
+    5    6.1958e+00  regression_structures
+    6    7.1252e+00  irregular_streaks
+    7    8.1940e+00  healthy_skin
+    8    9.4231e+00  asymmetry
+    9    9.4231e+00  irregular_pigmentation
+   10    9.4231e+00  strawberry_pattern
+   11    1.0837e+01  blue_white_veil
+   12    1.0837e+01  arborizing_vessels
+   13    1.0837e+01  comedo_like_openings
+   14    1.0837e+01  cerebriform_surface
+   15    1.6481e+01  colour_variation
+   16    2.1796e+01  blue_grey_ovoid_nests
+   17    2.5066e+01  ulceration
+   18    3.3149e+01  red_lacunae
+   19    3.8122e+01  diameter_large
+   20    3.8122e+01  atypical_pigment_network
+   21    3.8122e+01  scaly_surface
+   22    3.8122e+01  milia_like_cysts
+   23    3.8122e+01  central_white_patch
+   24    4.3840e+01  reticular_network
+
+Done. All outputs under results/sparsity_sweep/warm_conc/

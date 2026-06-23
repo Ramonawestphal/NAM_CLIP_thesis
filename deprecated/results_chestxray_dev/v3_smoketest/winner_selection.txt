@@ -1,0 +1,27 @@
+bilateral_interstitial_pattern
+  Candidate _a:
+    prompt: "Chest radiograph of viral pneumonia showing diffuse hazy opacity replacing the normal lung markings throughout both lung fields"
+    per-class means: normal=0.4155, bacteria=0.4038, virus=0.4132
+    argmax: normal
+    discrimination_score: 0.0035
+  Candidate _b:
+    prompt: "Chest radiograph of viral pneumonia showing widespread cloudy opacification of both lungs without lobar consolidation"
+    per-class means: normal=0.3931, bacteria=0.3993, virus=0.4022
+    argmax: virus
+    discrimination_score: 0.0060
+  WINNER: _b
+  Rationale: tie (|Δ|=0.0025<0.005); _b argmax matches virus
+
+hyperinflation
+  Candidate _a:
+    prompt: "Chest radiograph of viral pneumonia showing increased lung volume with depressed diaphragms and widened intercostal spaces"
+    per-class means: normal=0.4069, bacteria=0.4115, virus=0.4128
+    argmax: virus
+    discrimination_score: 0.0036
+  Candidate _b:
+    prompt: "Chest radiograph of viral pneumonia showing increased perihilar bronchial markings with air trapping"
+    per-class means: normal=0.4323, bacteria=0.4064, virus=0.4245
+    argmax: normal
+    discrimination_score: 0.0051
+  WINNER: _a
+  Rationale: tie (|Δ|=0.0015<0.005); _a argmax matches virus

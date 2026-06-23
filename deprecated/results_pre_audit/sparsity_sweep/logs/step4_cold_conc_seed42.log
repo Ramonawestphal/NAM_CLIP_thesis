@@ -1,0 +1,1107 @@
+=================================================================
+Sparsity lambda sweep — cold-start mode
+  trainer           : scripts/train_nam_v6_final.py
+  seed              : 42
+  concurvity_lambda : 1.0
+  lambdas (12)      : [1e-05, 0.0001, 0.001, 0.01, 0.1, 1, 3, 10, 30, 100, 300, 1000.0]
+  output            : results\sparsity_sweep\cold_conc/
+=================================================================
+
+[start] lambda=1e-05 → results\sparsity_sweep\cold_conc\lambda_1e-05
+        log: results\sparsity_sweep\cold_conc\lambda_1e-05\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=1e-05  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.3528 val_loss=1.2046 val_balacc=0.5701 lr=1.00e-03 | R_perp=0.1142 R_sparse=175.699897
+  Epoch  20 | train_loss=1.2883 val_loss=1.1936 val_balacc=0.5908 lr=5.00e-04 | R_perp=0.1062 R_sparse=175.527956
+  Epoch  30 | train_loss=1.2617 val_loss=1.1901 val_balacc=0.6026 lr=5.00e-04 | R_perp=0.1040 R_sparse=175.681408
+  Epoch  40 | train_loss=1.2194 val_loss=1.1968 val_balacc=0.6047 lr=1.25e-04 | R_perp=0.1028 R_sparse=175.840286
+  Early stop at epoch 42 (best epoch 27, val_balacc=0.6076)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.5181  macro_f1=0.3981  AUC=0.8441  R_perp_val@best=0.1293  R_sparse@best=175.604443
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 1e-05 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 1e-05
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.5181 +/- nan
+  Macro F1                     : 0.3981 +/- nan
+  Weighted F1                  : 0.6149 +/- nan
+  Top-1 accuracy               : 0.5699 +/- nan
+  Multiclass AUC (OvR weighted): 0.8441 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1293 +/- nan
+  R_perp train : 0.1059 +/- nan
+  R_sparse train: 175.604443 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.5181 (-0.037)
+  vs v6 NAM Phase-1  (0.498): 0.5181 (+0.020)
+  vs v5 NAM baseline (0.540): 0.5181 (-0.022)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9110  0.6275    0.7431 0.8572     1337
+mel       0.2740  0.4450    0.3392 0.7628      218
+bkl       0.3942  0.3761    0.3850 0.8009      218
+bcc       0.2917  0.4900    0.3657 0.8715      100
+akiec     0.2000  0.5806    0.2975 0.8766       62
+vasc      0.3750  0.7500    0.5000 0.9779       32
+df        0.1000  0.3571    0.1562 0.8664       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.581  0.129  0.145  0.032  0.048  0.032  0.032
+bcc    0.140  0.490  0.070  0.090  0.070  0.070  0.070
+bkl    0.165  0.101  0.376  0.023  0.206  0.115  0.014
+df     0.107  0.071  0.071  0.357  0.036  0.250  0.107
+mel    0.119  0.073  0.138  0.028  0.445  0.179  0.018
+nv     0.049  0.050  0.058  0.051  0.149  0.628  0.016
+vasc   0.000  0.125  0.000  0.000  0.062  0.062  0.750
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_1e-05/
+
+Done.
+[done ] lambda=1e-05
+
+[start] lambda=0.0001 → results\sparsity_sweep\cold_conc\lambda_0.0001
+        log: results\sparsity_sweep\cold_conc\lambda_0.0001\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=0.0001  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.3528 val_loss=1.2046 val_balacc=0.5701 lr=1.00e-03 | R_perp=0.1142 R_sparse=175.699897
+  Epoch  20 | train_loss=1.2883 val_loss=1.1936 val_balacc=0.5908 lr=5.00e-04 | R_perp=0.1062 R_sparse=175.527956
+  Epoch  30 | train_loss=1.2617 val_loss=1.1901 val_balacc=0.6026 lr=5.00e-04 | R_perp=0.1040 R_sparse=175.681408
+  Epoch  40 | train_loss=1.2194 val_loss=1.1968 val_balacc=0.6047 lr=1.25e-04 | R_perp=0.1028 R_sparse=175.840286
+  Early stop at epoch 42 (best epoch 27, val_balacc=0.6076)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.5181  macro_f1=0.3981  AUC=0.8441  R_perp_val@best=0.1293  R_sparse@best=175.604443
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 0.0001 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 0.0001
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.5181 +/- nan
+  Macro F1                     : 0.3981 +/- nan
+  Weighted F1                  : 0.6149 +/- nan
+  Top-1 accuracy               : 0.5699 +/- nan
+  Multiclass AUC (OvR weighted): 0.8441 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1293 +/- nan
+  R_perp train : 0.1059 +/- nan
+  R_sparse train: 175.604443 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.5181 (-0.037)
+  vs v6 NAM Phase-1  (0.498): 0.5181 (+0.020)
+  vs v5 NAM baseline (0.540): 0.5181 (-0.022)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9110  0.6275    0.7431 0.8572     1337
+mel       0.2740  0.4450    0.3392 0.7628      218
+bkl       0.3942  0.3761    0.3850 0.8009      218
+bcc       0.2917  0.4900    0.3657 0.8715      100
+akiec     0.2000  0.5806    0.2975 0.8766       62
+vasc      0.3750  0.7500    0.5000 0.9779       32
+df        0.1000  0.3571    0.1562 0.8664       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.581  0.129  0.145  0.032  0.048  0.032  0.032
+bcc    0.140  0.490  0.070  0.090  0.070  0.070  0.070
+bkl    0.165  0.101  0.376  0.023  0.206  0.115  0.014
+df     0.107  0.071  0.071  0.357  0.036  0.250  0.107
+mel    0.119  0.073  0.138  0.028  0.445  0.179  0.018
+nv     0.049  0.050  0.058  0.051  0.149  0.628  0.016
+vasc   0.000  0.125  0.000  0.000  0.062  0.062  0.750
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_0.0001/
+
+Done.
+[done ] lambda=0.0001
+
+[start] lambda=0.001 → results\sparsity_sweep\cold_conc\lambda_0.001
+        log: results\sparsity_sweep\cold_conc\lambda_0.001\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=0.001  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.3538 val_loss=1.2023 val_balacc=0.5731 lr=1.00e-03 | R_perp=0.1144 R_sparse=175.689128
+  Epoch  20 | train_loss=1.2887 val_loss=1.1932 val_balacc=0.5773 lr=5.00e-04 | R_perp=0.1070 R_sparse=175.524319
+  Epoch  30 | train_loss=1.2616 val_loss=1.1879 val_balacc=0.6015 lr=5.00e-04 | R_perp=0.1033 R_sparse=175.663324
+  Epoch  40 | train_loss=1.2212 val_loss=1.1934 val_balacc=0.6056 lr=2.50e-04 | R_perp=0.1031 R_sparse=175.848764
+  Early stop at epoch 44 (best epoch 29, val_balacc=0.6073)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.5103  macro_f1=0.3868  AUC=0.8413  R_perp_val@best=0.1270  R_sparse@best=175.652608
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 0.001 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 0.001
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.5103 +/- nan
+  Macro F1                     : 0.3868 +/- nan
+  Weighted F1                  : 0.6102 +/- nan
+  Top-1 accuracy               : 0.5654 +/- nan
+  Multiclass AUC (OvR weighted): 0.8413 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1270 +/- nan
+  R_perp train : 0.1059 +/- nan
+  R_sparse train: 175.652608 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.5103 (-0.045)
+  vs v6 NAM Phase-1  (0.498): 0.5103 (+0.012)
+  vs v5 NAM baseline (0.540): 0.5103 (-0.030)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9048  0.6328    0.7447 0.8545     1337
+mel       0.2890  0.2890    0.2890 0.7568      218
+bkl       0.3166  0.4908    0.3849 0.8000      218
+bcc       0.3333  0.4000    0.3636 0.8707      100
+akiec     0.2143  0.5806    0.3130 0.8726       62
+vasc      0.3478  0.7500    0.4752 0.9802       32
+df        0.0816  0.4286    0.1371 0.8609       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.581  0.113  0.177  0.048  0.016  0.032  0.032
+bcc    0.170  0.400  0.100  0.140  0.050  0.080  0.060
+bkl    0.147  0.073  0.491  0.037  0.119  0.119  0.014
+df     0.071  0.036  0.071  0.429  0.036  0.250  0.107
+mel    0.106  0.050  0.289  0.041  0.289  0.202  0.023
+nv     0.043  0.031  0.108  0.076  0.090  0.633  0.019
+vasc   0.000  0.125  0.000  0.000  0.062  0.062  0.750
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_0.001/
+
+Done.
+[done ] lambda=0.001
+
+[start] lambda=0.01 → results\sparsity_sweep\cold_conc\lambda_0.01
+        log: results\sparsity_sweep\cold_conc\lambda_0.01\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=0.01  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.3523 val_loss=1.2044 val_balacc=0.5692 lr=1.00e-03 | R_perp=0.1142 R_sparse=175.639869
+  Epoch  20 | train_loss=1.2978 val_loss=1.2228 val_balacc=0.5821 lr=1.00e-03 | R_perp=0.1094 R_sparse=175.415270
+  Epoch  30 | train_loss=1.2484 val_loss=1.1912 val_balacc=0.5999 lr=5.00e-04 | R_perp=0.1025 R_sparse=175.661083
+  Epoch  40 | train_loss=1.2102 val_loss=1.1956 val_balacc=0.5980 lr=1.25e-04 | R_perp=0.1012 R_sparse=175.868645
+  Early stop at epoch 42 (best epoch 27, val_balacc=0.6149)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.5317  macro_f1=0.4065  AUC=0.8442  R_perp_val@best=0.1282  R_sparse@best=175.559590
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 0.01 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 0.01
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.5317 +/- nan
+  Macro F1                     : 0.4065 +/- nan
+  Weighted F1                  : 0.6176 +/- nan
+  Top-1 accuracy               : 0.5724 +/- nan
+  Multiclass AUC (OvR weighted): 0.8442 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1282 +/- nan
+  R_perp train : 0.1049 +/- nan
+  R_sparse train: 175.559590 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.5317 (-0.023)
+  vs v6 NAM Phase-1  (0.498): 0.5317 (+0.034)
+  vs v5 NAM baseline (0.540): 0.5317 (-0.008)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9119  0.6268    0.7429 0.8579     1337
+mel       0.2793  0.4587    0.3472 0.7624      218
+bkl       0.4109  0.3807    0.3952 0.7996      218
+bcc       0.3077  0.4800    0.3750 0.8693      100
+akiec     0.1917  0.5968    0.2902 0.8769       62
+vasc      0.3934  0.7500    0.5161 0.9761       32
+df        0.1132  0.4286    0.1791 0.8649       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.597  0.113  0.145  0.032  0.048  0.032  0.032
+bcc    0.140  0.480  0.060  0.090  0.090  0.070  0.070
+bkl    0.174  0.087  0.381  0.028  0.206  0.115  0.009
+df     0.071  0.036  0.071  0.429  0.036  0.250  0.107
+mel    0.133  0.060  0.128  0.028  0.459  0.174  0.018
+nv     0.055  0.048  0.055  0.053  0.148  0.627  0.014
+vasc   0.000  0.125  0.000  0.000  0.062  0.062  0.750
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_0.01/
+
+Done.
+[done ] lambda=0.01
+
+[start] lambda=0.1 → results\sparsity_sweep\cold_conc\lambda_0.1
+        log: results\sparsity_sweep\cold_conc\lambda_0.1\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=0.1  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.3529 val_loss=1.2040 val_balacc=0.5841 lr=1.00e-03 | R_perp=0.1140 R_sparse=175.117556
+  Epoch  20 | train_loss=1.2902 val_loss=1.1927 val_balacc=0.5887 lr=5.00e-04 | R_perp=0.1070 R_sparse=174.437195
+  Epoch  30 | train_loss=1.2600 val_loss=1.1877 val_balacc=0.6018 lr=5.00e-04 | R_perp=0.1053 R_sparse=174.294434
+  Epoch  40 | train_loss=1.2226 val_loss=1.1937 val_balacc=0.6044 lr=2.50e-04 | R_perp=0.1042 R_sparse=174.312356
+  Early stop at epoch 44 (best epoch 29, val_balacc=0.6115)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.5038  macro_f1=0.3817  AUC=0.8411  R_perp_val@best=0.1269  R_sparse@best=174.307033
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 0.1 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 0.1
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.5038 +/- nan
+  Macro F1                     : 0.3817 +/- nan
+  Weighted F1                  : 0.6089 +/- nan
+  Top-1 accuracy               : 0.5639 +/- nan
+  Multiclass AUC (OvR weighted): 0.8411 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1269 +/- nan
+  R_perp train : 0.1078 +/- nan
+  R_sparse train: 174.307033 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.5038 (-0.051)
+  vs v6 NAM Phase-1  (0.498): 0.5038 (+0.006)
+  vs v5 NAM baseline (0.540): 0.5038 (-0.036)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9011  0.6335    0.7440 0.8544     1337
+mel       0.2955  0.2982    0.2968 0.7552      218
+bkl       0.3201  0.4817    0.3846 0.8006      218
+bcc       0.3136  0.3700    0.3394 0.8699      100
+akiec     0.2047  0.5645    0.3004 0.8716       62
+vasc      0.3429  0.7500    0.4706 0.9787       32
+df        0.0811  0.4286    0.1364 0.8605       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.565  0.113  0.194  0.048  0.016  0.032  0.032
+bcc    0.180  0.370  0.100  0.140  0.060  0.090  0.060
+bkl    0.147  0.078  0.482  0.037  0.119  0.124  0.014
+df     0.071  0.036  0.071  0.429  0.036  0.250  0.107
+mel    0.106  0.046  0.271  0.046  0.298  0.211  0.023
+nv     0.046  0.031  0.105  0.076  0.089  0.634  0.020
+vasc   0.000  0.125  0.000  0.000  0.062  0.062  0.750
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_0.1/
+
+Done.
+[done ] lambda=0.1
+
+[start] lambda=1 → results\sparsity_sweep\cold_conc\lambda_1
+        log: results\sparsity_sweep\cold_conc\lambda_1\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=1.0  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.3511 val_loss=1.2048 val_balacc=0.5699 lr=1.00e-03 | R_perp=0.1142 R_sparse=169.979198
+  Epoch  20 | train_loss=1.2952 val_loss=1.2214 val_balacc=0.5794 lr=1.00e-03 | R_perp=0.1094 R_sparse=164.111782
+  Epoch  30 | train_loss=1.2572 val_loss=1.1855 val_balacc=0.6051 lr=5.00e-04 | R_perp=0.1042 R_sparse=160.883735
+  Epoch  40 | train_loss=1.2188 val_loss=1.1893 val_balacc=0.5991 lr=1.25e-04 | R_perp=0.1016 R_sparse=159.294104
+  Early stop at epoch 42 (best epoch 27, val_balacc=0.6143)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.5232  macro_f1=0.4018  AUC=0.8439  R_perp_val@best=0.1295  R_sparse@best=161.606944
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 1.0 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 1.0
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.5232 +/- nan
+  Macro F1                     : 0.4018 +/- nan
+  Weighted F1                  : 0.6168 +/- nan
+  Top-1 accuracy               : 0.5714 +/- nan
+  Multiclass AUC (OvR weighted): 0.8439 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1295 +/- nan
+  R_perp train : 0.1058 +/- nan
+  R_sparse train: 161.606944 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.5232 (-0.032)
+  vs v6 NAM Phase-1  (0.498): 0.5232 (+0.025)
+  vs v5 NAM baseline (0.540): 0.5232 (-0.017)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9127  0.6253    0.7421 0.8576     1337
+mel       0.2775  0.4633    0.3471 0.7609      218
+bkl       0.4118  0.3853    0.3981 0.8009      218
+bcc       0.3019  0.4800    0.3707 0.8691      100
+akiec     0.1979  0.5968    0.2972 0.8749       62
+vasc      0.3710  0.7188    0.4894 0.9768       32
+df        0.1068  0.3929    0.1679 0.8651       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.597  0.113  0.145  0.032  0.048  0.032  0.032
+bcc    0.140  0.480  0.060  0.100  0.090  0.070  0.060
+bkl    0.156  0.096  0.385  0.023  0.206  0.119  0.014
+df     0.107  0.071  0.071  0.393  0.036  0.214  0.107
+mel    0.128  0.060  0.133  0.028  0.463  0.170  0.018
+nv     0.053  0.047  0.055  0.052  0.152  0.625  0.016
+vasc   0.000  0.156  0.000  0.000  0.062  0.062  0.719
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_1/
+
+Done.
+[done ] lambda=1
+
+[start] lambda=3 → results\sparsity_sweep\cold_conc\lambda_3
+        log: results\sparsity_sweep\cold_conc\lambda_3\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=3.0  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.3524 val_loss=1.2164 val_balacc=0.5762 lr=1.00e-03 | R_perp=0.1136 R_sparse=158.568954
+  Epoch  20 | train_loss=1.3024 val_loss=1.2216 val_balacc=0.5743 lr=1.00e-03 | R_perp=0.1093 R_sparse=141.457517
+  Epoch  30 | train_loss=1.2723 val_loss=1.1909 val_balacc=0.5853 lr=5.00e-04 | R_perp=0.1049 R_sparse=131.467887
+  Epoch  40 | train_loss=1.2491 val_loss=1.1934 val_balacc=0.6023 lr=1.25e-04 | R_perp=0.1036 R_sparse=127.019430
+  Early stop at epoch 41 (best epoch 26, val_balacc=0.6125)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.5158  macro_f1=0.3816  AUC=0.8365  R_perp_val@best=0.1272  R_sparse@best=134.541000
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 3.0 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 3.0
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.5158 +/- nan
+  Macro F1                     : 0.3816 +/- nan
+  Weighted F1                  : 0.6038 +/- nan
+  Top-1 accuracy               : 0.5544 +/- nan
+  Multiclass AUC (OvR weighted): 0.8365 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1272 +/- nan
+  R_perp train : 0.1052 +/- nan
+  R_sparse train: 134.541000 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.5158 (-0.039)
+  vs v6 NAM Phase-1  (0.498): 0.5158 (+0.018)
+  vs v5 NAM baseline (0.540): 0.5158 (-0.024)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9083  0.6073    0.7279 0.8486     1337
+mel       0.3116  0.3945    0.3482 0.7537      218
+bkl       0.3561  0.4541    0.3992 0.7989      218
+bcc       0.2903  0.3600    0.3214 0.8642      100
+akiec     0.1989  0.5806    0.2963 0.8732       62
+vasc      0.3158  0.7500    0.4444 0.9752       32
+df        0.0783  0.4643    0.1340 0.8576       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.581  0.097  0.161  0.065  0.032  0.032  0.032
+bcc    0.150  0.360  0.080  0.160  0.070  0.100  0.080
+bkl    0.156  0.087  0.454  0.032  0.151  0.106  0.014
+df     0.107  0.036  0.071  0.464  0.036  0.179  0.107
+mel    0.119  0.041  0.206  0.041  0.394  0.179  0.018
+nv     0.050  0.037  0.085  0.088  0.109  0.607  0.024
+vasc   0.000  0.125  0.000  0.000  0.031  0.094  0.750
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_3/
+
+Done.
+[done ] lambda=3
+
+[start] lambda=10 → results\sparsity_sweep\cold_conc\lambda_10
+        log: results\sparsity_sweep\cold_conc\lambda_10\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=10.0  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.3865 val_loss=1.2743 val_balacc=0.5551 lr=1.00e-03 | R_perp=0.1125 R_sparse=119.025912
+  Epoch  20 | train_loss=1.3683 val_loss=1.2689 val_balacc=0.5610 lr=5.00e-04 | R_perp=0.1033 R_sparse=90.388233
+  Epoch  30 | train_loss=1.3710 val_loss=1.2722 val_balacc=0.5663 lr=1.25e-04 | R_perp=0.0995 R_sparse=77.418378
+  Early stop at epoch 30 (best epoch 15, val_balacc=0.5786)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.4971  macro_f1=0.3655  AUC=0.8229  R_perp_val@best=0.1371  R_sparse@best=103.700956
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 10.0 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 10.0
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.4971 +/- nan
+  Macro F1                     : 0.3655 +/- nan
+  Weighted F1                  : 0.5830 +/- nan
+  Top-1 accuracy               : 0.5333 +/- nan
+  Multiclass AUC (OvR weighted): 0.8229 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1371 +/- nan
+  R_perp train : 0.1061 +/- nan
+  R_sparse train: 103.700956 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.4971 (-0.058)
+  vs v6 NAM Phase-1  (0.498): 0.4971 (-0.001)
+  vs v5 NAM baseline (0.540): 0.4971 (-0.043)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9025  0.5744    0.7020 0.8343     1337
+mel       0.2578  0.4541    0.3289 0.7301      218
+bkl       0.3893  0.4358    0.4113 0.7985      218
+bcc       0.2500  0.3400    0.2881 0.8452      100
+akiec     0.1886  0.5323    0.2785 0.8667       62
+vasc      0.2697  0.7500    0.3967 0.9643       32
+df        0.0948  0.3929    0.1528 0.8481       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.532  0.097  0.177  0.032  0.065  0.065  0.032
+bcc    0.150  0.340  0.100  0.120  0.070  0.090  0.130
+bkl    0.128  0.096  0.436  0.014  0.206  0.110  0.009
+df     0.107  0.071  0.071  0.393  0.036  0.179  0.143
+mel    0.092  0.069  0.165  0.018  0.454  0.174  0.028
+nv     0.057  0.041  0.067  0.063  0.169  0.574  0.028
+vasc   0.000  0.094  0.000  0.000  0.062  0.094  0.750
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_10/
+
+Done.
+[done ] lambda=10
+
+[start] lambda=30 → results\sparsity_sweep\cold_conc\lambda_30
+        log: results\sparsity_sweep\cold_conc\lambda_30\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=30.0  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.8498 val_loss=1.8162 val_balacc=0.3573 lr=1.00e-03 | R_perp=0.0597 R_sparse=13.114296
+  Epoch  20 | train_loss=1.7772 val_loss=1.7723 val_balacc=0.2681 lr=2.50e-04 | R_perp=0.0000 R_sparse=2.692067
+  Early stop at epoch 21 (best epoch 6, val_balacc=0.5260)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.4552  macro_f1=0.3122  AUC=0.7399  R_perp_val@best=0.1992  R_sparse@best=76.041883
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 30.0 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 30.0
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.4552 +/- nan
+  Macro F1                     : 0.3122 +/- nan
+  Weighted F1                  : 0.5233 +/- nan
+  Top-1 accuracy               : 0.4707 +/- nan
+  Multiclass AUC (OvR weighted): 0.7399 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1992 +/- nan
+  R_perp train : 0.1193 +/- nan
+  R_sparse train: 76.041883 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.4552 (-0.100)
+  vs v6 NAM Phase-1  (0.498): 0.4552 (-0.043)
+  vs v5 NAM baseline (0.540): 0.4552 (-0.085)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.8692  0.4921    0.6285 0.7253     1337
+mel       0.2319  0.4862    0.3141 0.7086      218
+bkl       0.3817  0.4220    0.4009 0.7762      218
+bcc       0.2885  0.1500    0.1974 0.7748      100
+akiec     0.1724  0.5645    0.2642 0.8461       62
+vasc      0.1678  0.7500    0.2743 0.9189       32
+df        0.0634  0.3214    0.1059 0.8346       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.565  0.065  0.194  0.016  0.081  0.048  0.032
+bcc    0.160  0.150  0.160  0.110  0.090  0.130  0.200
+bkl    0.119  0.037  0.422  0.009  0.229  0.151  0.032
+df     0.214  0.000  0.071  0.321  0.036  0.143  0.214
+mel    0.069  0.023  0.151  0.018  0.486  0.197  0.055
+nv     0.078  0.014  0.064  0.086  0.212  0.492  0.054
+vasc   0.031  0.031  0.000  0.000  0.094  0.094  0.750
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_30/
+
+Done.
+[done ] lambda=30
+
+[start] lambda=100 → results\sparsity_sweep\cold_conc\lambda_100
+        log: results\sparsity_sweep\cold_conc\lambda_100\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=100.0  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.9458 val_loss=1.9453 val_balacc=0.1429 lr=5.00e-04 | R_perp=0.0000 R_sparse=0.000000
+  Early stop at epoch 17 (best epoch 2, val_balacc=0.5013)
+  Feature selection: 24/24 concepts active (group_norm >= 0.0001)
+  Test  bal_acc=0.4075  macro_f1=0.2542  AUC=0.6991  R_perp_val@best=0.2010  R_sparse@best=82.678176
+
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 100.0 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 100.0
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.4075 +/- nan
+  Macro F1                     : 0.2542 +/- nan
+  Weighted F1                  : 0.4401 +/- nan
+  Top-1 accuracy               : 0.3860 +/- nan
+  Multiclass AUC (OvR weighted): 0.6991 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.2010 +/- nan
+  R_perp train : 0.1348 +/- nan
+  R_sparse train: 82.678176 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.4075 (-0.148)
+  vs v6 NAM Phase-1  (0.498): 0.4075 (-0.091)
+  vs v5 NAM baseline (0.540): 0.4075 (-0.133)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9203  0.3800    0.5379 0.6872     1337
+mel       0.2143  0.3028    0.2510 0.7044      218
+bkl       0.2188  0.5872    0.3188 0.7004      218
+bcc       0.3333  0.0700    0.1157 0.6877      100
+akiec     0.1203  0.4677    0.1914 0.8094       62
+vasc      0.1507  0.6875    0.2472 0.8729       32
+df        0.0704  0.3571    0.1176 0.8118       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.468  0.016  0.258  0.048  0.129  0.032  0.048
+bcc    0.150  0.070  0.310  0.170  0.070  0.040  0.190
+bkl    0.115  0.009  0.587  0.023  0.174  0.046  0.046
+df     0.179  0.000  0.143  0.357  0.036  0.071  0.214
+mel    0.087  0.023  0.394  0.028  0.303  0.115  0.050
+nv     0.110  0.004  0.236  0.074  0.141  0.380  0.056
+vasc   0.031  0.031  0.156  0.062  0.000  0.031  0.688
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_100/
+
+Done.
+[done ] lambda=100
+
+[start] lambda=300 → results\sparsity_sweep\cold_conc\lambda_300
+        log: results\sparsity_sweep\cold_conc\lambda_300\run.log
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=300.0  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.9458 val_loss=1.9452 val_balacc=0.1429 lr=5.00e-04 | R_perp=0.0000 R_sparse=0.000000
+  Early stop at epoch 16 (best epoch 1, val_balacc=0.1429)
+  Feature selection: 0/24 concepts active (group_norm >= 0.0001)
+  Zeroed concepts  : ['asymmetry', 'border_irregularity', 'colour_variation', 'diameter_large', 'atypical_pigment_network', 'blue_white_veil', 'atypical_vascular_pattern', 'irregular_streaks', 'irregular_pigmentation', 'irregular_dots_globules', 'regression_structures', 'symmetric_uniform', 'reticular_network', 'arborizing_vessels', 'blue_grey_ovoid_nests', 'ulceration', 'scaly_surface', 'strawberry_pattern', 'milia_like_cysts', 'comedo_like_openings', 'cerebriform_surface', 'central_white_patch', 'red_lacunae', 'healthy_skin']
+  Test  bal_acc=0.1429  macro_f1=0.0136  AUC=0.5000  R_perp_val@best=0.0000  R_sparse@best=81.467670
+Traceback (most recent call last):
+  File "C:\Users\Ramona\.vscode\NAM_CLIP_thesis\scripts\train_nam_v6_final.py", line 517, in <module>
+    raise RuntimeError(
+    ...<3 lines>...
+    )
+RuntimeError: No seed reached val balanced accuracy >= 0.5 within the first 30 epochs. Check data and features. Use --skip_convergence_check to bypass (e.g. for short sanity-check runs).
+[ERROR] lambda=300 — exit code 1. See results\sparsity_sweep\cold_conc\lambda_300\run.log

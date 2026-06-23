@@ -11,7 +11,7 @@ Same train/val/test protocol and metrics as the chest X-ray NAM pipeline:
 
 Hard isolation rules
 ────────────────────
-- Do NOT modify scripts/v7/, scripts/run_ml_baselines.py, src/, or any
+- Do NOT modify scripts/HAM10000/, scripts/run_ml_baselines.py, src/, or any
   HAM10000 artefact.
 - Do NOT modify any existing chest X-ray artefact (splits, features, prior
   NAM results).

@@ -1,0 +1,14 @@
+{
+  "dense_val_balacc": 0.6129831038022565,
+  "dense_val_auc": 0.8625897364696687,
+  "hidden_dims": [
+    64,
+    32
+  ],
+  "dropout": 0.1,
+  "weight_decay": 0.0001,
+  "concurvity_lambda": 0.0,
+  "warmup_dense": 0,
+  "seed": 42,
+  "timestamp": "2026-06-05T19:18:35.898834+00:00"
+}

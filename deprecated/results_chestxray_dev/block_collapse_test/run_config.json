@@ -1,0 +1,90 @@
+{
+  "run_date": "2026-06-11",
+  "source_files": {
+    "by_seed": "results\\chestxray\\anec_evaluation\\by_seed.csv",
+    "surviving_concepts_summary": "results\\chestxray\\anec_evaluation\\surviving_concepts_summary.csv",
+    "v4_npz": "data/features/biomedclip/chestxray_concept_scores_v4.npz"
+  },
+  "block_definitions": {
+    "Consolidation": {
+      "concepts": [
+        "consolidation",
+        "focal_opacity",
+        "lobar_consolidation",
+        "dense_segmental_opacity",
+        "air_bronchograms"
+      ],
+      "predicted_range": [
+        2,
+        3
+      ],
+      "description": "partial collapse, 2-3 of 5",
+      "within_block_r": "0.634"
+    },
+    "Interstitial": {
+      "concepts": [
+        "bilateral_interstitial_pattern",
+        "peribronchial_cuffing",
+        "perihilar_infiltrates"
+      ],
+      "predicted_range": [
+        1,
+        1
+      ],
+      "description": "near-full collapse, 1 of 3",
+      "within_block_r": "0.749"
+    },
+    "Normal-anchor": {
+      "concepts": [
+        "clear_lung_fields",
+        "sharp_costophrenic_angles",
+        "normal_cardiac_silhouette",
+        "symmetric_lung_aeration"
+      ],
+      "predicted_range": [
+        1,
+        1
+      ],
+      "description": "full collapse, 1 of 4",
+      "within_block_r": "0.9"
+    },
+    "Ungrouped": {
+      "concepts": [
+        "pleural_effusion",
+        "silhouette_sign",
+        "patchy_infiltrate",
+        "parapneumonic_effusion",
+        "round_pneumonia"
+      ],
+      "predicted_range": [
+        3,
+        4
+      ],
+      "description": "most survive, 3-4 of 5",
+      "within_block_r": "varies (0.23-0.46)"
+    }
+  },
+  "combined_prediction": {
+    "total_min": 7,
+    "total_max": 9,
+    "note": "7-9 total survivors at primary K (K=8)"
+  },
+  "target_Ks": [
+    5,
+    8,
+    10
+  ],
+  "primary_K": 8,
+  "conditions": [
+    "sparsity_only",
+    "sparsity_conc"
+  ],
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "wall_time_seconds": 0.29
+}

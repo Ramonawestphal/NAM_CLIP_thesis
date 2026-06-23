@@ -1,0 +1,2 @@
+bilateral_interstitial_pattern	Chest radiograph of viral pneumonia showing widespread cloudy opacification of both lungs without lobar consolidation
+hyperinflation	Chest radiograph of viral pneumonia showing increased lung volume with depressed diaphragms and widened intercostal spaces

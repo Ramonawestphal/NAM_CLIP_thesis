@@ -15,7 +15,7 @@ Datasets / conditions:
                 to the K=10 step (no step-level checkpoints in the sweep).
 
 Primary checkpoints are saved to:
-  results/ham10000/primary_checkpoints/seed_{N}/
+  results/HAM10000/primary_checkpoints/seed_{N}/
   results/chestxray/primary_checkpoints/seed_{N}/
 
 Usage (from project root):
@@ -33,8 +33,8 @@ Outputs (results/analysis/nonlinearity/):
 
 Constraints:
   - Test set is NOT loaded.  R² is computed on the train_final distribution only.
-  - Do NOT modify scripts/v7/, scripts/chestxray/, src/, or any prior artefact.
-  - All shared helpers imported from scripts/v7/_common.py unmodified.
+  - Do NOT modify scripts/HAM10000/, scripts/chestxray/, src/, or any prior artefact.
+  - All shared helpers imported from scripts/HAM10000/_common.py unmodified.
 """
 
 from __future__ import annotations
@@ -80,8 +80,8 @@ from src.models.sparsity import apply_proximal_step, feature_group_norms
 SEEDS = [42, 43, 44, 45, 46]
 
 # HAM10000
-HAM_COND_DIR   = "results/v7/sparsity_sweep/sparsity_concurvity"
-HAM_WINNER_JSON = "results/v7/architecture_search_cv/winner.json"
+HAM_COND_DIR   = "results/HAM10000/sparsity_sweep/sparsity_concurvity"
+HAM_WINNER_JSON = "results/HAM10000/architecture_search_cv/winner.json"
 HAM_N_FEATURES  = 24
 HAM_N_CLASSES   = 7
 
@@ -117,7 +117,7 @@ CXR_MAX_LAMBDA      = 1e3
 ZERO_THRESHOLD = 1e-6
 
 # Primary checkpoints (output caches)
-HAM_PRIMARY_BASE = "results/ham10000/primary_checkpoints"
+HAM_PRIMARY_BASE = "results/HAM10000/primary_checkpoints"
 CXR_PRIMARY_BASE = "results/chestxray/primary_checkpoints"
 
 # Analysis output

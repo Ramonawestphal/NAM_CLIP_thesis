@@ -28,7 +28,13 @@
       "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
       "Bash(python -c \"import xgboost; print\\(xgboost.__version__\\)\")",
       "Bash(Get-ChildItem -Recurse -Directory)",
-      "Bash(Select-Object -ExpandProperty FullName)"
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(cd \"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\"; Get-ChildItem -Recurse -Exclude .venv,.git,.pytest_cache -Directory | ForEach-Object { $_.FullName -replace [regex]::Escape\\($PWD + '\\\\'\\), '' } | Sort-Object)",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(xargs grep -l \"r2\\\\|R2\\\\|nonlinear\")",
+      "Bash(xargs grep -l \"shape\\\\|plot\\\\|f_k\\\\|contrib\")"
     ]
   }
 }

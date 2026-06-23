@@ -1,0 +1,87 @@
+======================================================================
+V1 vs V2 COMPARISON SUMMARY
+======================================================================
+
+SECTION 1 — HEADLINE COUNTS
+  v1: 14/19 MATCH   v2: 16/18 MATCH
+  Of 5 REVISED concepts:
+    REVISED-FIXED           : 3
+    REVISED-PERSISTENT-FAIL : 2
+    REVISED-REGRESSED       : 0
+  Of 13 UNCHANGED concepts:
+    UNCHANGED-STILL-MATCH   : 13  (expected 13)
+
+SECTION 2 — PER-REVISED-CONCEPT COMPARISON
+
+  [bilateral_interstitial_pattern]  [T2B-virus]  → PERSISTENT-FAIL
+    v1 prompt: Chest radiograph of viral pneumonia showing a bilateral interstitial pattern
+    v2 prompt: Chest radiograph of viral pneumonia showing fine reticular lines and ground-glass opacities throughout both lungs
+    v1 means: normal=0.4213  bacteria=0.3980  virus=0.4206  argmax=normal  spread=0.0233
+    v2 means: normal=0.4451  bacteria=0.3790  virus=0.4184  argmax=normal  spread=0.0661
+    spread change: +0.0428
+
+  [dense_segmental_opacity]  [T2A-bacteria]  → FIXED
+    v1 prompt: Chest radiograph of bacterial pneumonia showing a dense segmental opacity
+    v2 prompt: Chest radiograph of bacterial pneumonia showing a dense white opacity confined to one lung segment
+    v1 means: normal=0.3704  bacteria=0.3674  virus=0.3662  argmax=normal  spread=0.0042
+    v2 means: normal=0.3457  bacteria=0.3647  virus=0.3546  argmax=bacteria  spread=0.0189
+    spread change: +0.0147
+
+  [focal_opacity]  [T1-general]  → FIXED
+    v1 prompt: Chest radiograph showing a focal area of increased opacity
+    v2 prompt: Chest radiograph of pneumonia showing a focal pulmonary opacity obscuring lung markings
+    v1 means: normal=0.3854  bacteria=0.3585  virus=0.3807  argmax=normal  spread=0.0270
+    v2 means: normal=0.3424  bacteria=0.3422  virus=0.3442  argmax=virus  spread=0.0020
+    spread change: -0.0250
+
+  [hyperinflation]  [T2B-virus]  → PERSISTENT-FAIL
+    v1 prompt: Chest radiograph of viral pneumonia showing hyperinflation of the lungs
+    v2 prompt: Chest radiograph of viral pneumonia showing overexpanded lungs with flattened diaphragm domes
+    v1 means: normal=0.4391  bacteria=0.3965  virus=0.4188  argmax=normal  spread=0.0426
+    v2 means: normal=0.4045  bacteria=0.3896  virus=0.3931  argmax=normal  spread=0.0149
+    spread change: -0.0277
+
+  [round_pneumonia]  [T2A-bacteria]  → FIXED
+    v1 prompt: Chest radiograph of bacterial pneumonia showing a rounded well-circumscribed opacity
+    v2 prompt: Chest radiograph of bacterial pneumonia showing a rounded mass-like pulmonary consolidation
+    v1 means: normal=0.3504  bacteria=0.3298  virus=0.3400  argmax=normal  spread=0.0206
+    v2 means: normal=0.3346  bacteria=0.3458  virus=0.3435  argmax=bacteria  spread=0.0112
+    spread change: -0.0094
+
+SECTION 3 — DROPPED CONCEPT
+  Concept: no_focal_opacity
+  v1 result: argmax=normal (match=True)
+  v1 r with clear_lung_fields: +0.9644
+  Justification: extreme semantic redundancy with clear_lung_fields,
+    not correlation tuning. Removed to avoid a near-duplicate feature.
+
+SECTION 4 — CORRELATION STRUCTURE COMPARISON
+  Mean |r| (all pairs):       v1=0.4494  v2=0.4210  Δ=-0.0284
+  Within-block mean |r|:
+    consolidation_block:  v1=0.5135  v2=0.6342
+    interstitial_block:   v1=0.8751  v2=0.7678
+    normal_anchor_block:  v1=0.9160 (5 mem)  v2=0.9003 (4 mem)
+  Between-block mean |r| (consolidation × interstitial):
+    v1=0.4074  v2=0.3303
+  Anchor×pneumonia signed r:
+    anchor×consolidation: v1=-0.0926  v2=-0.2711
+    anchor×interstitial:  v1=+0.5001  v2=+0.5796
+  Expected: within-block correlations persist (no structure engineering);
+    targeted revisions may shift specific pairwise r but blocks should remain.
+
+SECTION 5 — PRE-REGISTERED HYPOTHESIS FOLLOW-UP
+  (H1-H5 pre-registered on v1; v2 reported as follow-up, not fresh pre-registration)
+  H1: Within consolidation_block, mean |r| > 0.7
+      v1: FAIL   v2: FAIL
+  H2: Within interstitial_block, mean |r| > 0.7
+      v1: PASS   v2: PASS
+  H3: Between consolidation & interstitial, mean |r| < within-block |r| of either
+      v1: PASS   v2: PASS
+  H4: normal_anchor_block correlates negatively (signed r < 0) with both pneumonia blocks
+      v1: FAIL   v2: FAIL
+  H5: Aggregate mean |r| over all pairs falls in [0.3, 0.6]
+      v1: PASS   v2: PASS
+
+SECTION 6 — RECOMMENDATION
+  v2 substantially improves on v1; recommend adopting v2 as operative
+  feature set for downstream NAM training.

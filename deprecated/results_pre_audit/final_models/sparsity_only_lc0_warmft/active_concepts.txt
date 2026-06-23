@@ -1,0 +1,37 @@
+# Config: sparsity_only_lc0_warmft
+# Majority threshold: >= 3/5 seeds with group_norm > 1e-08
+
+ACTIVE:
+  asymmetry
+  colour_variation
+  diameter_large
+  atypical_pigment_network
+  reticular_network
+  ulceration
+  scaly_surface
+  milia_like_cysts
+  comedo_like_openings
+  cerebriform_surface
+  central_white_patch
+  red_lacunae
+
+ELIMINATED:
+  border_irregularity
+  blue_white_veil
+  atypical_vascular_pattern
+  irregular_streaks
+  irregular_pigmentation
+  irregular_dots_globules
+  regression_structures
+  symmetric_uniform
+  arborizing_vessels
+  blue_grey_ovoid_nests
+  strawberry_pattern
+  healthy_skin
+
+Per-seed active counts:
+  seed 42: 10/24
+  seed 43: 13/24
+  seed 44: 11/24
+  seed 45: 14/24
+  seed 46: 9/24

@@ -7,7 +7,7 @@ label dimension: num_classes=3 and the secondary metric is macro-OvR AUC.
 
 12-config v7 grid x 5 pre-built StratifiedGroupKFold folds x 1 seed (42) = 60
 runs. Selection metric: mean val balanced accuracy across folds (v7 rule). The
-per-run training/early-stopping is delegated to scripts/v7/_common.train_one_run
+per-run training/early-stopping is delegated to scripts/HAM10000/_common.train_one_run
 (Adam lr=1e-3, batch=256, ReduceLROnPlateau(mode="max", factor=0.5, patience=5,
 min_lr=1e-6), early stop on val balanced accuracy, max_epochs=80/patience=15,
 CrossEntropyLoss with balanced class weights). Only divergence from v7:

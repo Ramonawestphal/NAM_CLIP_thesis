@@ -1,0 +1,46 @@
+==== Shape Function Analysis (NAM v6 Final, seed 44) ====
+
+Winning architecture: hidden=[64, 32], dropout=0.1
+Test balanced accuracy (best seed): 0.5509
+
+Top 10 concepts by total range (most influential):
+              concept_id   range  curvature
+           scaly_surface 25.4813     0.8596
+             red_lacunae 20.8935     0.5720
+  irregular_pigmentation 18.6841     1.6258
+     central_white_patch 18.6628     0.9749
+       reticular_network 14.9917     1.4376
+        colour_variation 12.8541     1.5346
+ irregular_dots_globules 12.3895     0.8125
+               asymmetry 11.9037     1.3500
+atypical_pigment_network 11.8438     0.8500
+         blue_white_veil 11.0348     1.0957
+
+Top 10 concepts by curvature (most nonlinear — NAM adds value over LR here):
+            concept_id  curvature   range
+irregular_pigmentation     1.6258 18.6841
+      colour_variation     1.5346 12.8541
+     reticular_network     1.4376 14.9917
+             asymmetry     1.3500 11.9037
+    strawberry_pattern     1.2470  5.4185
+       blue_white_veil     1.0957 11.0348
+          healthy_skin     1.0352  6.5061
+   border_irregularity     1.0064  6.0803
+   central_white_patch     0.9749 18.6628
+     irregular_streaks     0.8924 10.4510
+
+Interpretation:
+  Range     — sum over classes of |max - min| contribution across empirical support;
+              higher = concept strongly differentiates classes
+  Curvature — L2 distance from best-fit line, summed over classes (root-mean
+              squared residual per class, then summed); higher = genuinely
+              nonlinear relationship the NAM learned that a linear model cannot
+              capture. Concepts here are candidates for interaction terms in
+              Phase 2.
+
+Plots include rug marks showing training-data density in z-score space.
+Dense rug regions are where shape function estimates are most reliable;
+sparse tails may show unstable behaviour.
+
+Outputs -> reports/nam/v6_final/shape_functions/
+

@@ -1,0 +1,23 @@
+{
+  "seed": 42,
+  "hidden_dims": [
+    64,
+    32
+  ],
+  "dropout": 0.1,
+  "weight_decay": 0.0001,
+  "concurvity_lambda": 3.0,
+  "lambda_0": 0.001,
+  "epsilon": 0.02,
+  "max_lambda": 1000.0,
+  "max_lambda_steps": 300,
+  "max_dense_epochs": 100,
+  "max_warm_epochs": 50,
+  "n_steps_run": 300,
+  "dense_val_balacc": 0.6015658552299671,
+  "issue4_fix": "best_within_step_checkpoint_restored",
+  "warmup_protocol": "warmup_dense=0 (0=Setting A, diagnostic confirmed)",
+  "timestamp": "2026-06-05T18:36:50.527604+00:00",
+  "winner_json": "results/v7/architecture_search_cv/winner.json",
+  "elapsed_min": 141.19686501820883
+}

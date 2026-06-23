@@ -1,0 +1,41 @@
+==== NAM Base Training (BiomedCLIP v5 features) ====
+
+Trained 5 seeds with hyperparameters:
+  lr=0.001, weight_decay=1e-05, batch=256, max_epochs=100, patience=10
+  subnet: [64, 64, 32] + ReLU + dropout 0.1
+  class_weight='balanced'
+
+Test-set results (mean ± std across seeds):
+  Balanced accuracy            : 0.5403 ± 0.0103
+  Macro F1                     : 0.4306 ± 0.0212
+  Weighted F1                  : 0.6267 ± 0.0271
+  Top-1 accuracy               : 0.5822 ± 0.0355
+  Multiclass AUC (OvR weighted): 0.8662 ± 0.0058
+
+Comparison to logistic regression baseline:
+  Balanced accuracy : NAM 0.540 vs LR 0.608  (Δ -0.068)
+  Macro F1          : NAM 0.431 vs LR 0.485  (Δ -0.054)
+  Multiclass AUC    : NAM 0.866 vs LR 0.891  (Δ -0.025)
+
+Per-class metrics (NAM, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9291  0.6283    0.7487 0.8831     1337
+mel       0.2830  0.4358    0.3429 0.7702      218
+bkl       0.3612  0.4633    0.4017 0.8053      218
+bcc       0.3674  0.5880    0.4335 0.9163      100
+akiec     0.2399  0.5032    0.3187 0.9003       62
+vasc      0.4985  0.7063    0.5721 0.9778       32
+df        0.1352  0.4571    0.1969 0.8978       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.503  0.194  0.184  0.006  0.084  0.013  0.016
+bcc    0.080  0.588  0.086  0.104  0.054  0.044  0.044
+bkl    0.093  0.140  0.463  0.033  0.178  0.086  0.006
+df     0.207  0.071  0.064  0.457  0.079  0.107  0.014
+mel    0.113  0.065  0.187  0.027  0.436  0.159  0.014
+nv     0.035  0.039  0.089  0.058  0.140  0.628  0.011
+vasc   0.000  0.106  0.019  0.006  0.075  0.088  0.706
+
+Outputs → reports/nam/base/
+

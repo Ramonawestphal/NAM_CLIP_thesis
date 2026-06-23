@@ -1,0 +1,65 @@
+======================================================================
+CHEST X-RAY CONCEPT CORRELATION DIAGNOSTIC — v2
+(follow-up after targeted prompt revision; H1-H5 pre-registered on v1)
+======================================================================
+Concepts: 18  |  Off-diagonal pairs: 153
+Mean |r|   : 0.4210
+Median |r| : 0.4263
+Pairs with |r| > 0.7: 24
+Pairs with |r| > 0.8: 12
+Pairs with |r| > 0.9: 3
+
+Top-10 highest |r| pairs:
+   1. clear_lung_fields × symmetric_lung_aeration  |r|=0.9508
+   2. clear_lung_fields × sharp_costophrenic_angles  |r|=0.9246
+   3. normal_cardiac_silhouette × symmetric_lung_aeration  |r|=0.9032
+   4. sharp_costophrenic_angles × symmetric_lung_aeration  |r|=0.8850
+   5. clear_lung_fields × normal_cardiac_silhouette  |r|=0.8829
+   6. bilateral_interstitial_pattern × clear_lung_fields  |r|=0.8767
+   7. peribronchial_cuffing × perihilar_infiltrates  |r|=0.8617
+   8. bilateral_interstitial_pattern × symmetric_lung_aeration  |r|=0.8614
+   9. sharp_costophrenic_angles × normal_cardiac_silhouette  |r|=0.8552
+  10. consolidation × lobar_consolidation  |r|=0.8501
+
+Block structure (pre-registered):
+  consolidation_block
+    Members: ['consolidation', 'focal_opacity', 'lobar_consolidation', 'dense_segmental_opacity', 'air_bronchograms']
+    Within-block mean |r|: 0.6342
+  interstitial_block
+    Members: ['bilateral_interstitial_pattern', 'peribronchial_cuffing', 'perihilar_infiltrates']
+    Within-block mean |r|: 0.7678
+  normal_anchor_block
+    Members: ['clear_lung_fields', 'sharp_costophrenic_angles', 'normal_cardiac_silhouette', 'symmetric_lung_aeration']
+    Within-block mean |r|: 0.9003
+
+Between-block correlations:
+  consolidation_block × interstitial_block
+    Mean signed r: 0.2262   Mean |r|: 0.2262
+  consolidation_block × normal_anchor_block
+    Mean signed r: -0.2711   Mean |r|: 0.2711
+  interstitial_block × normal_anchor_block
+    Mean signed r: 0.5796   Mean |r|: 0.5796
+
+Ungrouped concepts (mean |r| to all others):
+  pleural_effusion: mean |r| to others = 0.2831
+  silhouette_sign: mean |r| to others = 0.2454
+  patchy_infiltrate: mean |r| to others = 0.3876
+  parapneumonic_effusion: mean |r| to others = 0.4489
+  round_pneumonia: mean |r| to others = 0.4284
+  hyperinflation: mean |r| to others = 0.3937
+
+======================================================================
+Pre-registered predictions (registered on v1; v2 = follow-up check):
+======================================================================
+H1: Within consolidation_block, mean |r| > 0.7
+    Observed within-block mean |r| = 0.6342  → FAIL
+H2: Within interstitial_block, mean |r| > 0.7
+    Observed within-block mean |r| = 0.7678  → PASS
+H3: Between consolidation_block and interstitial_block, mean |r| < within-block mean |r| of either block
+    Between-block mean |r| = 0.3303  vs within-con=0.6342, within-int=0.7678  → PASS
+H4: normal_anchor_block correlates negatively (mean signed r < 0) with both pneumonia-feature blocks
+    anchor×consolidation mean r = -0.2711  anchor×interstitial mean r = 0.5796  → FAIL
+H5: Aggregate mean |r| over all 153 pairs falls in [0.3, 0.6], lower than HAM10000's 0.475
+    Observed mean |r| = 0.4210  → PASS
+
+Hypothesis summary: 3/5 PASS

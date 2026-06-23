@@ -1,0 +1,56 @@
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Concurvity regularization (Siems et al. 2023, arXiv:2305.11475):
+  lambda = 3.0
+  Objective: L_total = L_task + 3.0 * R_perp
+  R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+  (multiclass avg over K=7 classes; Pearson corr over batch dim)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.5206 +/- nan
+  Macro F1                     : 0.3938 +/- nan
+  Weighted F1                  : 0.5982 +/- nan
+  Top-1 accuracy               : 0.5544 +/- nan
+  Multiclass AUC (OvR weighted): 0.8266 +/- nan
+
+Concurvity diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val  : 0.1158 +/- nan
+  R_perp train: 0.0795 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.5206 (-0.034)
+  vs v6 NAM Phase-1  (0.498): 0.5206 (+0.023)
+  vs v5 NAM baseline (0.540): 0.5206 (-0.019)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9094  0.5931    0.7180 0.8407     1337
+mel       0.2630  0.4404    0.3293 0.7337      218
+bkl       0.3453  0.4862    0.4038 0.7954      218
+bcc       0.2803  0.4400    0.3424 0.8299      100
+akiec     0.2308  0.4839    0.3125 0.8662       62
+vasc      0.3214  0.8438    0.4655 0.9792       32
+df        0.1250  0.3571    0.1852 0.8487       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.484  0.161  0.194  0.016  0.048  0.065  0.032
+bcc    0.110  0.440  0.100  0.070  0.110  0.070  0.100
+bkl    0.106  0.087  0.486  0.018  0.197  0.096  0.009
+df     0.071  0.143  0.071  0.357  0.036  0.214  0.107
+mel    0.050  0.069  0.225  0.018  0.440  0.174  0.023
+nv     0.040  0.048  0.096  0.040  0.157  0.593  0.026
+vasc   0.000  0.031  0.000  0.000  0.031  0.094  0.844
+
+Outputs -> reports\nam\v6_concurvity_sweep\lambda_3.0/
+

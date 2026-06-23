@@ -1,0 +1,44 @@
+{
+  "sparsity_only": {
+    "first_elimination_step": 37,
+    "first_elimination_lambda": 4.10393255398042,
+    "first_eliminated_concept": "perihilar_infiltrates",
+    "n_active_at_step_100": 5,
+    "lambda_at_step_100": 48.56245017718229,
+    "monotone_n_active": true,
+    "criterion_b_first_elim_le_50": true,
+    "criterion_b_n_active_le_10_at_100": true,
+    "criterion_b_pass": true,
+    "dense_val_balacc": 0.7445846488306103,
+    "concurvity_lambda": 0.0,
+    "n_steps_run": 100,
+    "elapsed_min": 7.7
+  },
+  "sparsity_conc": {
+    "first_elimination_step": 32,
+    "first_elimination_lambda": 3.3731334104286432,
+    "first_eliminated_concept": "air_bronchograms",
+    "n_active_at_step_100": 3,
+    "lambda_at_step_100": 48.56245017718229,
+    "monotone_n_active": true,
+    "criterion_b_first_elim_le_50": true,
+    "criterion_b_n_active_le_10_at_100": true,
+    "criterion_b_pass": true,
+    "dense_val_balacc": 0.7330553031054925,
+    "concurvity_lambda": 3.0,
+    "n_steps_run": 100,
+    "elapsed_min": 10.2
+  },
+  "overall_verdict": "PASS",
+  "recommendation": "Both conditions pass. Schedule \u03bb_0=1.0, \u03b5=0.04, 150 steps is viable for chest X-ray. Proceed to full 5-seed sweep.",
+  "schedule_params": {
+    "lambda_0": 1.0,
+    "epsilon": 0.04,
+    "max_lambda_steps": 100,
+    "max_warm_epochs": 30,
+    "warm_patience": 6
+  },
+  "total_elapsed_min": 17.8,
+  "dry_run": false,
+  "timestamp": "2026-06-10T12:38:51.241832+00:00"
+}

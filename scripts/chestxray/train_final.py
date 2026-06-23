@@ -1,7 +1,7 @@
 """
 Final 5-seed NAM training — chest X-ray three-way task.
 
-Mirrors scripts/v7/train_final.py exactly for the chest X-ray dataset
+Mirrors scripts/HAM10000/train_final.py exactly for the chest X-ray dataset
 (Normal / Bacteria / Virus, 3 classes, 17 features, Config 10 architecture).
 Structured for all four experimental conditions; plain_nam and concurvity_only
 are implemented.  sparsity_only and sparsity_conc are stubs for future work.
