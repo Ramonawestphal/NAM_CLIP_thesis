@@ -10,7 +10,31 @@
       "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --concurvity_lambda 1.0 --out_dir reports/nam/sanity2_b --skip_convergence_check)",
       "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 1.0 --out_dir reports/nam/sanity2_c --skip_convergence_check)",
       "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 500.0 --out_dir reports/nam/sanity2_probe --skip_convergence_check)",
-      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 1.0 --no-proximal_sparsity --out_dir reports/nam/sanity2_d --skip_convergence_check)"
+      "Bash(python scripts/train_nam_v6_final.py --max_epochs 2 --seed 42 --sparsity_lambda 1.0 --no-proximal_sparsity --out_dir reports/nam/sanity2_d --skip_convergence_check)",
+      "Bash(python -c ' *)",
+      "Bash(python scripts/_run_production_sweeps.py)",
+      "Bash(python -)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\" -Recurse -File | Where-Object { $_.FullName -notmatch '\\(__pycache__|\\\\.git|\\\\.pyc|\\\\.venv|\\\\.pytest_cache\\)' } | Select-Object FullName, @{Name='Size\\(bytes\\)';Expression={$_.Length}} | Sort-Object FullName)",
+      "Bash(if [ -d \"/mnt/c/Users/Ramona/.vscode/NAM_CLIP_thesis/results\" ]; then ls \"/mnt/c/Users/Ramona/.vscode/NAM_CLIP_thesis/results\"; else echo \"results/ dir not found via WSL path\"; fi)",
+      "Bash(python scripts/v7/train_final.py --condition concurvity_only --warmup_epochs 0 --out_dir results/v7/diagnostic_warmup/warmup_0 --no_step_flag)",
+      "Bash(python scripts/v7/train_final.py --condition concurvity_only --warmup_epochs 2 --out_dir results/v7/diagnostic_warmup/warmup_2 --no_step_flag)",
+      "Bash(python scripts/v7/diagnostic_warmup_report.py)",
+      "Bash(df -h .)",
+      "Bash(python -c \"import shutil; t,u,f=shutil.disk_usage\\('.'\\); print\\(f'Total: {t//2**30} GB, Used: {u//2**30} GB, Free: {f//2**30} GB'\\)\")",
+      "Bash(python -c \"import torch; print\\('torch', torch.__version__\\); import numpy; print\\('numpy', numpy.__version__\\); import sklearn; print\\('sklearn', sklearn.__version__\\); import pandas; print\\('pandas', pandas.__version__\\)\")",
+      "Bash(python scripts/v7/run_sparsity_sweep.py --condition sparsity_only --seeds 42 43 44 45 46 --out_root results/v7/sparsity_sweep)",
+      "Bash(python scripts/v7/run_sparsity_sweep.py --condition sparsity_concurvity --seeds 42 43 44 45 46 --out_root results/v7/sparsity_sweep)",
+      "Bash(pip install *)",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(python -c \"import xgboost; print\\(xgboost.__version__\\)\")",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(cd \"C:\\\\Users\\\\Ramona\\\\.vscode\\\\NAM_CLIP_thesis\"; Get-ChildItem -Recurse -Exclude .venv,.git,.pytest_cache -Directory | ForEach-Object { $_.FullName -replace [regex]::Escape\\($PWD + '\\\\'\\), '' } | Sort-Object)",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(xargs grep -l \"r2\\\\|R2\\\\|nonlinear\")",
+      "Bash(xargs grep -l \"shape\\\\|plot\\\\|f_k\\\\|contrib\")"
     ]
   }
 }

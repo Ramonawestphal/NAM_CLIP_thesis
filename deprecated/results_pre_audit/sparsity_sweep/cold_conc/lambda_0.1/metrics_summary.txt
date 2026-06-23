@@ -1,0 +1,63 @@
+==== NAM v6 Final Training (BiomedCLIP v6 features, 24 concepts) ====
+
+Sweep winner: config 9
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  sweep val balacc (seed 42) : 0.6155
+
+Trained 1 seeds with fixed lr=0.001, batch=256,
+  max_epochs=100, patience=15,
+  ReduceLROnPlateau(patience=5, factor=0.5)
+
+Regularization:
+  Objective: L_total = L_task + 1.0 * R_perp + 0.1 * R_sparse
+  Concurvity (Siems et al. 2023, arXiv:2305.11475, NeurIPS 2023):
+    lambda_concurvity = 1.0
+    R_perp = (1/K) * sum_k  mean_{i<j} |Corr(f_{i,k}(X_i), f_{j,k}(X_j))|
+    (multiclass avg over K=7 classes; Pearson corr over batch dim)
+  Group LASSO sparsity (Xu et al. 2022, arXiv:2202.12482, ICLR 2022):
+    lambda_sparsity = 0.1
+    R_sparse = sum_{i=1}^{p} ||theta_i||_2  (L2 norm of each sub-network group)
+    zero_threshold = 0.0001
+    Sparsity method: proximal gradient descent — exact group zeroing (Xu et al. 2022)
+
+Test-set results (mean +/- std across seeds):
+  Balanced accuracy            : 0.5038 +/- nan
+  Macro F1                     : 0.3817 +/- nan
+  Weighted F1                  : 0.6089 +/- nan
+  Top-1 accuracy               : 0.5639 +/- nan
+  Multiclass AUC (OvR weighted): 0.8411 +/- nan
+
+Regularization diagnostics (at best-val epoch, mean +/- std across seeds):
+  R_perp val   : 0.1269 +/- nan
+  R_perp train : 0.1078 +/- nan
+  R_sparse train: 174.307033 +/- nan
+
+Three-way comparison:
+  vs v6 LR baseline  (0.555): 0.5038 (-0.051)
+  vs v6 NAM Phase-1  (0.498): 0.5038 (+0.006)
+  vs v5 NAM baseline (0.540): 0.5038 (-0.036)
+
+Per-class metrics (NAM v6 final, mean across seeds):
+       precision  recall  f1-score    auc  support
+nv        0.9011  0.6335    0.7440 0.8544     1337
+mel       0.2955  0.2982    0.2968 0.7552      218
+bkl       0.3201  0.4817    0.3846 0.8006      218
+bcc       0.3136  0.3700    0.3394 0.8699      100
+akiec     0.2047  0.5645    0.3004 0.8716       62
+vasc      0.3429  0.7500    0.4706 0.9787       32
+df        0.0811  0.4286    0.1364 0.8605       28
+
+Confusion matrix (row-normalised, seed-mean):
+       akiec    bcc    bkl     df    mel     nv   vasc
+akiec  0.565  0.113  0.194  0.048  0.016  0.032  0.032
+bcc    0.180  0.370  0.100  0.140  0.060  0.090  0.060
+bkl    0.147  0.078  0.482  0.037  0.119  0.124  0.014
+df     0.071  0.036  0.071  0.429  0.036  0.250  0.107
+mel    0.106  0.046  0.271  0.046  0.298  0.211  0.023
+nv     0.046  0.031  0.105  0.076  0.089  0.634  0.020
+vasc   0.000  0.125  0.000  0.000  0.062  0.062  0.750
+
+Outputs -> results\sparsity_sweep\cold_conc\lambda_0.1/
+

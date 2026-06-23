@@ -1,0 +1,44 @@
+======================================================================
+H4 INVESTIGATION v4: normal_anchor_block × interstitial_block
+======================================================================
+Repeating H4 investigation on v4 features to check whether prompt
+revision changed the between-block correlation pattern.
+normal_anchor_block members (v4): ['clear_lung_fields', 'sharp_costophrenic_angles', 'normal_cardiac_silhouette', 'symmetric_lung_aeration']
+interstitial_block  members (v4): ['bilateral_interstitial_pattern', 'peribronchial_cuffing', 'perihilar_infiltrates']
+
+────────────────────────────────────────────────────────────
+STEP 1-2: Per-class means and discrimination check
+────────────────────────────────────────────────────────────
+
+normal_anchor_block (expected: normal > virus for all):
+  clear_lung_fields                         normal=0.4340  virus=0.4069  bacteria=0.3740  → normal > virus ✓
+  sharp_costophrenic_angles                 normal=0.3916  virus=0.3668  bacteria=0.3347  → normal > virus ✓
+  normal_cardiac_silhouette                 normal=0.4410  virus=0.4031  bacteria=0.3810  → normal > virus ✓
+  symmetric_lung_aeration                   normal=0.4267  virus=0.3900  bacteria=0.3645  → normal > virus ✓
+
+interstitial_block (expected: virus > normal for all):
+  bilateral_interstitial_pattern            normal=0.3974  virus=0.4030  bacteria=0.4002  → virus > normal ✓
+  peribronchial_cuffing                     normal=0.3807  virus=0.3826  bacteria=0.3637  → virus > normal ✓
+  perihilar_infiltrates                     normal=0.4122  virus=0.4160  bacteria=0.4024  → virus > normal ✓
+
+Step 2 decision: anchor all correct=True, interstitial all correct=True
+→ Prompts discriminate per-class correctly: YES
+
+────────────────────────────────────────────────────────────
+STEP 3: Cross-image correlations (within normal class)
+────────────────────────────────────────────────────────────
+
+Full train-pool mean |r| (anchor × interstitial): 0.3489
+Within-normal-class correlations (n=1265 images):
+                                          bilateral_interstitial_patternperibronchial_cuffing       perihilar_infiltrates       
+  clear_lung_fields                         -0.0712                +0.5463                +0.1317              
+  sharp_costophrenic_angles                 -0.2905                +0.4085                -0.0319              
+  normal_cardiac_silhouette                 +0.1324                +0.0658                +0.2466              
+  symmetric_lung_aeration                   +0.1077                +0.3455                +0.1411              
+
+Within-normal mean |r|: 0.2099
+
+────────────────────────────────────────────────────────────
+VERDICT
+────────────────────────────────────────────────────────────
+VERDICT: Mixed / inconclusive

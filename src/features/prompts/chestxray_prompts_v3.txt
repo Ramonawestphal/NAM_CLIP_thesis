@@ -1,0 +1,195 @@
+# Chest X-ray Concept Prompts - VERSION 3 (smoke-test selected viral-tier revision)
+#
+# Dataset: Kermany et al. (2018) Chest X-ray Pneumonia; BiomedCLIP (ViT-B/16 + PubMedBERT)
+#
+# ──────────────────────────────────────────────────────────────────────
+# Iteration history
+# ──────────────────────────────────────────────────────────────────────
+# v1: 19-concept set. Per-class diagnostic 14/19 MATCH; mean |r| = 0.449.
+# v2: conservative targeted revision (5 revised, 1 dropped → 18 concepts).
+#     Per-class diagnostic 16/18 MATCH. Two viral-tier concepts persistently
+#     failed: bilateral_interstitial_pattern (argmax=normal, spread 0.066 in
+#     the WRONG direction) and hyperinflation (argmax=normal, spread 0.015).
+# v3 (this file): the 16 v2-MATCH concepts are FROZEN (copied verbatim from v2,
+#     byte-identical). The 2 failing concepts get the winning phrasing from a
+#     smoke test: two candidate phrasings per concept were scored on a 300-image
+#     stratified subsample of the train pool by
+#         discrimination_score = mean_virus - 0.5*(mean_normal + mean_bacteria),
+#     and the higher-scoring candidate was selected BEFORE full extraction. This
+#     avoids selecting prompts on their full-train-pool diagnostic performance.
+#
+# Pre-commit note (Ramona's deferred decision rule): if either of these two v3
+# concepts persistently fails per-class discrimination on the full train pool,
+# the decision on whether to drop or iterate further is held over to post-v3
+# review.
+#
+# Total: 18 concepts (16 frozen from v2 + 2 smoke-test winners).
+# Format: INI-style, one t1 prompt per concept (matches prompt_loader.py).
+
+
+[consolidation]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=bacteria, spread=0.032)
+tier: 1
+t1: Chest radiograph showing pulmonary consolidation
+
+[air_bronchograms]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=virus, spread=0.015)
+tier: 1
+t1: Chest radiograph showing air bronchograms within an opacity
+
+[pleural_effusion]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=bacteria, spread=0.016)
+tier: 1
+t1: Chest radiograph showing a pleural effusion with blunting of the costophrenic angle
+
+[focal_opacity]
+# REVISED
+# v1 prompt: "Chest radiograph showing a focal area of increased opacity"
+# v1 result: MISMATCH (argmax=normal 0.385, bacteria 0.358, virus 0.381;
+#            spread=0.027)
+# Failure mode: anchored on normal. "Focal area of increased opacity"
+# matches captions describing focal anatomic structures (hilar shadow,
+# cardiac border) on normal films. The phrase lacked a disease anchor.
+# Revision strategy: add disease anchor; specify pulmonary parenchymal
+# location with an explicit pathologic descriptor ("obscuring lung
+# markings") that does not appear in normal-anatomy captions.
+tier: 1
+t1: Chest radiograph of pneumonia showing a focal pulmonary opacity obscuring lung markings
+
+[silhouette_sign]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=bacteria, spread=0.017)
+# Note: previously suspected to fail based on the earlier (wrong-file)
+# diagnostic. The correct v1 diagnostic showed it works. Not revised.
+tier: 1
+t1: Chest radiograph showing loss of the cardiac or diaphragmatic silhouette
+
+[patchy_infiltrate]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=virus, spread=0.015)
+tier: 1
+t1: Chest radiograph showing patchy infiltrates in the lung parenchyma
+
+[lobar_consolidation]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=bacteria, spread=0.062 — strongest bacterial
+# concept)
+tier: 2
+t1: Chest radiograph of bacterial pneumonia showing dense lobar consolidation
+
+[dense_segmental_opacity]
+# REVISED
+# v1 prompt: "Chest radiograph of bacterial pneumonia showing a dense segmental opacity"
+# v1 result: MISMATCH (argmax=normal 0.370, bacteria 0.367, virus 0.366;
+#            spread=0.004 — noise-level, prompt effectively invisible)
+# Failure mode: near-zero spread indicates the prompt was not meaningfully
+# resolved by BiomedCLIP. "Segmental opacity" is anatomic-functional
+# jargon with limited representation in image-caption training data.
+# Revision strategy: replace with a more visual phrasing ("dense white
+# opacity confined to one lung segment") that names the visual property
+# (whiteness, spatial confinement) rather than the anatomic-functional
+# concept.
+tier: 2
+t1: Chest radiograph of bacterial pneumonia showing a dense white opacity confined to one lung segment
+
+[parapneumonic_effusion]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=bacteria, spread=0.036)
+tier: 2
+t1: Chest radiograph of bacterial pneumonia showing a parapneumonic pleural effusion
+
+[round_pneumonia]
+# REVISED
+# v1 prompt: "Chest radiograph of bacterial pneumonia showing a rounded well-circumscribed opacity"
+# v1 result: MISMATCH (argmax=normal 0.350, bacteria 0.330, virus 0.340;
+#            spread=0.021)
+# Failure mode: "rounded well-circumscribed opacity" plausibly matched
+# normal rounded anatomic shadows (heart, hilum, thymus in paediatric
+# films) on clean films.
+# Revision strategy: emphasise the pulmonary parenchymal location
+# ("pulmonary consolidation") and the tissue-mimicking quality
+# ("mass-like") to disambiguate from normal anatomic shadows.
+tier: 2
+t1: Chest radiograph of bacterial pneumonia showing a rounded mass-like pulmonary consolidation
+
+[bilateral_interstitial_pattern]
+# REVISED in v3 (smoke-test winner: candidate _b)
+# Replaces v2 prompt: "Chest radiograph of viral pneumonia showing fine reticular lines and ground-glass opacities throughout both lungs"
+# Smoke-test (300-image stratified subsample) discrimination_score = 0.0060
+#   (= mean_virus - 0.5*(mean_normal + mean_bacteria); subsample per-class means: normal=0.3931, bacteria=0.3993, virus=0.4022)
+# Selected by the v3 smoke test BEFORE full-train-pool extraction, to
+# avoid prompt tuning on the diagnostic.
+tier: 2
+t1: Chest radiograph of viral pneumonia showing widespread cloudy opacification of both lungs without lobar consolidation
+
+[peribronchial_cuffing]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=virus 0.383, normal 0.381; margin 0.002 —
+# correct direction but knife-edge). Spread=0.019.
+# Not revised: the direction is correct and v1 phrasing reproduces a
+# standard radiology term. Revision risks moving in either direction
+# without clear evidence of failure.
+tier: 2
+t1: Chest radiograph of viral pneumonia showing peribronchial cuffing and thickening
+
+[perihilar_infiltrates]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=virus 0.416, normal 0.412; margin 0.004 —
+# correct direction). Spread=0.014.
+# Not revised: same reasoning as peribronchial_cuffing.
+tier: 2
+t1: Chest radiograph of viral pneumonia showing perihilar infiltrates
+
+[hyperinflation]
+# REVISED in v3 (smoke-test winner: candidate _a)
+# Replaces v2 prompt: "Chest radiograph of viral pneumonia showing overexpanded lungs with flattened diaphragm domes"
+# Smoke-test (300-image stratified subsample) discrimination_score = 0.0036
+#   (= mean_virus - 0.5*(mean_normal + mean_bacteria); subsample per-class means: normal=0.4069, bacteria=0.4115, virus=0.4128)
+# Selected by the v3 smoke test BEFORE full-train-pool extraction, to
+# avoid prompt tuning on the diagnostic.
+tier: 2
+t1: Chest radiograph of viral pneumonia showing increased lung volume with depressed diaphragms and widened intercostal spaces
+
+[clear_lung_fields]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=normal, spread=0.060)
+tier: 3
+t1: Chest radiograph of normal lungs showing clear and well-aerated lung fields
+
+[sharp_costophrenic_angles]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=normal, spread=0.057)
+tier: 3
+t1: Chest radiograph of normal lungs showing sharp costophrenic angles
+
+[normal_cardiac_silhouette]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=normal, spread=0.060)
+tier: 3
+t1: Chest radiograph of normal lungs showing a normal cardiac silhouette
+
+[symmetric_lung_aeration]
+# UNCHANGED from v1
+# v1 result: MATCH (argmax=normal, spread=0.062)
+# Note: highly correlated with clear_lung_fields (r=0.95 in v1) but
+# captures a conceptually distinct visual aspect (left-right symmetry
+# vs general clarity). Retained.
+tier: 3
+t1: Chest radiograph of normal lungs showing symmetric aeration of both lungs
+
+
+# ============================================================
+# DROPPED FROM v1: no_focal_opacity
+# ============================================================
+# v1 prompt was: "Chest radiograph of normal lungs showing no focal
+# opacity or consolidation"
+# v1 result: MATCH (argmax=normal, spread=0.072) — worked as a feature
+# but was r=0.96 with clear_lung_fields and r=0.96 with
+# symmetric_lung_aeration. The phrasing was a negation of pneumonia
+# rather than a description of normal lung anatomy, duplicating
+# clear_lung_fields with different wording. Dropped to remove obvious
+# semantic duplication. This is a conservative pruning move, not a
+# correlation-structure intervention.

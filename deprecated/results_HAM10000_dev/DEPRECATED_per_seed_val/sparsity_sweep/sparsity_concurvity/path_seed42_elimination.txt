@@ -1,0 +1,29 @@
+condition=sparsity_concurvity  seed=42
+dense_val_balacc=0.6009  dense_val_auc=0.8347
+
+order      lambda_s  concept
+------------------------------------------
+    1    2.2788e+00  border_irregularity
+    2    2.2788e+00  irregular_streaks
+    3    2.2788e+00  irregular_pigmentation
+    4    2.2788e+00  regression_structures
+    5    2.6658e+00  irregular_dots_globules
+    6    3.7943e+00  atypical_vascular_pattern
+    7    5.8412e+00  healthy_skin
+    8    6.0748e+00  colour_variation
+    9    6.0748e+00  arborizing_vessels
+   10    6.3178e+00  blue_white_veil
+   11    8.9922e+00  cerebriform_surface
+   12    9.3519e+00  diameter_large
+   13    1.4397e+01  symmetric_uniform
+   14    1.4397e+01  blue_grey_ovoid_nests
+   15    1.4397e+01  strawberry_pattern
+   16    1.4397e+01  comedo_like_openings
+   17    1.5572e+01  ulceration
+   18    3.1545e+01  asymmetry
+   19    4.1511e+01  atypical_pigment_network
+   20    4.1511e+01  red_lacunae
+   21    4.4899e+01  scaly_surface
+   22    4.8562e+01  central_white_patch
+   23    5.0505e+01  milia_like_cysts
+   24    5.4626e+01  reticular_network

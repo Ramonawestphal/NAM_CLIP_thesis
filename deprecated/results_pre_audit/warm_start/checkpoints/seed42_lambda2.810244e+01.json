@@ -1,0 +1,37 @@
+{
+  "lambda": 28.10243684806433,
+  "n_active": 7,
+  "val_balacc": 0.5172381411943864,
+  "val_auc": 0.7485149556449489,
+  "val_loss": 1.5783976633101702,
+  "actual_epochs": 6,
+  "norms": {
+    "asymmetry": 0.0,
+    "border_irregularity": 0.0,
+    "colour_variation": 0.0,
+    "diameter_large": 2.2700960636138916,
+    "atypical_pigment_network": 0.0,
+    "blue_white_veil": 0.0,
+    "atypical_vascular_pattern": 0.0,
+    "irregular_streaks": 0.0,
+    "irregular_pigmentation": 0.0,
+    "irregular_dots_globules": 0.0,
+    "regression_structures": 0.0,
+    "symmetric_uniform": 0.0,
+    "reticular_network": 3.1330113410949707,
+    "arborizing_vessels": 0.0,
+    "blue_grey_ovoid_nests": 0.0,
+    "ulceration": 0.0,
+    "scaly_surface": 2.3839008808135986,
+    "strawberry_pattern": 0.0,
+    "milia_like_cysts": 0.0,
+    "comedo_like_openings": 2.2539024353027344,
+    "cerebriform_surface": 1.704552173614502,
+    "central_white_patch": 2.3868978023529053,
+    "red_lacunae": 1.5603371858596802,
+    "healthy_skin": 0.0
+  },
+  "just_eliminated": [
+    "blue_grey_ovoid_nests"
+  ]
+}

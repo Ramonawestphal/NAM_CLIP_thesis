@@ -1,0 +1,41 @@
+{
+  "smoke_test": true,
+  "seed": 42,
+  "max_lambda_steps": 100,
+  "lambda_0": 1.0,
+  "epsilon": 0.04,
+  "max_lambda": 1000.0,
+  "max_dense_epochs": 100,
+  "max_warm_epochs": 30,
+  "warm_patience": 6,
+  "warm_min_delta": 0.0001,
+  "conditions": [
+    "sparsity_only",
+    "sparsity_conc"
+  ],
+  "sparsity_only_lam_c": 0.0,
+  "sparsity_conc_lam_c": 3.0,
+  "concurvity_winner_source": "results/chestxray/concurvity_sweep/winner.json",
+  "val_random_state": 42,
+  "val_split_note": "GroupShuffleSplit(random_state=42), identical to STEP 2/3/4",
+  "config_id": 10,
+  "hidden_dims": [
+    64,
+    32
+  ],
+  "dropout": 0.1,
+  "weight_decay": 0.0001,
+  "n_features": 17,
+  "num_classes": 3,
+  "feature_file": "data/features/biomedclip/chestxray_concept_scores_v4.npz",
+  "split_file": "data/splits/chestxray_outer_split.npz",
+  "zero_threshold": 1e-06,
+  "pass_criteria": {
+    "crit_a": "first_elimination_step <= 50",
+    "crit_b": "n_active_at_step_100 <= 10"
+  },
+  "test_set_touched": false,
+  "dry_run": false,
+  "timestamp": "2026-06-10T12:21:01.396375+00:00",
+  "git_commit": "4b50e64"
+}

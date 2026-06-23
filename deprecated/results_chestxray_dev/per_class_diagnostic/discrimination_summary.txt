@@ -1,0 +1,35 @@
+======================================================================
+PER-CONCEPT DISCRIMINATION SUMMARY (train pool)
+======================================================================
+consolidation                             argmax=bacteria    expected=['bacteria', 'virus']   spread=0.0320  [T1-general]  MATCH
+air_bronchograms                          argmax=virus       expected=['bacteria', 'virus']   spread=0.0146  [T1-general]  MATCH
+pleural_effusion                          argmax=bacteria    expected=['bacteria', 'virus']   spread=0.0162  [T1-general]  MATCH
+focal_opacity                             argmax=normal      expected=['bacteria', 'virus']   spread=0.0270  [T1-general]  MISMATCH
+    MISMATCH details: normal=0.3854  bacteria=0.3585  virus=0.3807
+silhouette_sign                           argmax=bacteria    expected=['bacteria', 'virus']   spread=0.0174  [T1-general]  MATCH
+patchy_infiltrate                         argmax=virus       expected=['bacteria', 'virus']   spread=0.0146  [T1-general]  MATCH
+lobar_consolidation                       argmax=bacteria    expected=['bacteria']            spread=0.0617  [T2A-bacteria]  MATCH
+dense_segmental_opacity                   argmax=normal      expected=['bacteria']            spread=0.0042  [T2A-bacteria]  MISMATCH
+    MISMATCH details: normal=0.3704  bacteria=0.3674  virus=0.3662
+parapneumonic_effusion                    argmax=bacteria    expected=['bacteria']            spread=0.0364  [T2A-bacteria]  MATCH
+round_pneumonia                           argmax=normal      expected=['bacteria']            spread=0.0206  [T2A-bacteria]  MISMATCH
+    MISMATCH details: normal=0.3504  bacteria=0.3298  virus=0.3400
+bilateral_interstitial_pattern            argmax=normal      expected=['virus']               spread=0.0233  [T2B-virus]  MISMATCH
+    MISMATCH details: normal=0.4213  bacteria=0.3980  virus=0.4206
+peribronchial_cuffing                     argmax=virus       expected=['virus']               spread=0.0189  [T2B-virus]  MATCH
+perihilar_infiltrates                     argmax=virus       expected=['virus']               spread=0.0136  [T2B-virus]  MATCH
+hyperinflation                            argmax=normal      expected=['virus']               spread=0.0426  [T2B-virus]  MISMATCH
+    MISMATCH details: normal=0.4391  bacteria=0.3965  virus=0.4188
+clear_lung_fields                         argmax=normal      expected=['normal']              spread=0.0600  [T3-normal]  MATCH
+sharp_costophrenic_angles                 argmax=normal      expected=['normal']              spread=0.0569  [T3-normal]  MATCH
+normal_cardiac_silhouette                 argmax=normal      expected=['normal']              spread=0.0601  [T3-normal]  MATCH
+no_focal_opacity                          argmax=normal      expected=['normal']              spread=0.0723  [T3-normal]  MATCH
+symmetric_lung_aeration                   argmax=normal      expected=['normal']              spread=0.0623  [T3-normal]  MATCH
+
+Concepts matching expected target: 14 / 19
+
+Breakdown by tier:
+  T1-general        : 5/6
+  T2A-bacteria      : 2/4
+  T2B-virus         : 2/4
+  T3-normal         : 5/5

@@ -1,0 +1,53 @@
+======================================================================
+V3 vs V4 COMPARISON SUMMARY
+======================================================================
+
+SECTION 1 — HEADLINE COUNTS
+  v3: 17/18 MATCH   v4: 17/17 MATCH
+  The improvement is STRUCTURAL (removed the single non-discriminating
+  concept), not behavioural: no prompt was revised, so all 17 kept
+  concepts have bit-identical scores and unchanged argmax.
+  Change sets: 17 frozen, 0 revised, 1 dropped.
+    UNCHANGED-STILL-MATCH : 17 (expected 17)
+
+SECTION 2 — DROPPED CONCEPT: hyperinflation
+  Three-iteration trajectory (argmax=normal at every step):
+    v1: spread=0.0430  "hyperinflation of the lungs"
+    v2: spread=0.0150  "overexpanded lungs with flattened diaphragm domes"
+    v3: spread=0.0008  "increased lung volume with depressed diaphragms and widened intercostal spaces"
+  The spread SHRINKS toward zero as prompts become more pathology-specific.
+  This indicates BiomedCLIP cannot discriminate viral hyperinflation from
+  normal lung aeration — a property of the encoder, not of prompt phrasing.
+  Decision: drop rather than iterate further.
+
+SECTION 3 — CORRELATION STRUCTURE COMPARISON
+  Mean |r| (all pairs):       v3=0.4075  v4=0.4121  Δ=+0.0046
+  Within-block mean |r|:
+    consolidation_block:  v3=0.6342  v4=0.6342
+    interstitial_block:   v3=0.7490  v4=0.7490
+    normal_anchor_block:  v3=0.9003  v4=0.9003
+  Between-block mean |r| (consolidation × interstitial):
+    v3=0.4305  v4=0.4305
+  Dropped concept hyperinflation was UNGROUPED; its v3 mean |r| to all
+  others = 0.3710 (weakly correlated), so block structure is
+  essentially unaffected — only small numerical shifts expected.
+
+SECTION 4 — PRE-REGISTERED HYPOTHESIS FOLLOW-UP
+  (H1-H5 pre-registered on v1; v4 reported as follow-up, not fresh pre-registration)
+  H1: Within consolidation_block, mean |r| > 0.7
+      v3: FAIL   v4: FAIL
+  H2: Within interstitial_block, mean |r| > 0.7
+      v3: PASS   v4: PASS
+  H3: Between consolidation & interstitial, mean |r| < within-block |r| of either
+      v3: PASS   v4: PASS
+  H4: normal_anchor_block correlates negatively (signed r < 0) with both pneumonia blocks
+      v3: FAIL   v4: FAIL
+  H5: Aggregate mean |r| over all pairs falls in [0.3, 0.6]
+      v3: PASS   v4: PASS
+
+SECTION 5 — RECOMMENDATION
+  v4 is the operative feature set. All 17 concepts pass per-class
+  discrimination MATCH on the train pool. Recommend proceeding to NAM
+  training using
+  data/features/biomedclip/chestxray_concept_scores_v4.npz as the
+  feature input.

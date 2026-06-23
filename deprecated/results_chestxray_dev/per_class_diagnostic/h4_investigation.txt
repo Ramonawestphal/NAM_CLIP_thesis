@@ -1,0 +1,60 @@
+======================================================================
+H4 INVESTIGATION: normal_anchor_block × interstitial_block
+======================================================================
+H4 predicted: normal_anchor_block correlates negatively with both pneumonia-feature blocks.
+Observed: mean signed r = +0.50 (interstitial), anomalous positive.
+Two candidate explanations:
+  A: semantic-axis confound (shared latent axis across images)
+  B: prompt discrimination failure
+
+────────────────────────────────────────────────────────────
+STEP 1-2: Per-class means and discrimination check
+────────────────────────────────────────────────────────────
+
+normal_anchor_block (expected: normal > virus for all 4):
+  clear_lung_fields                         normal=0.4340  virus=0.4069  bacteria=0.3740  → normal > virus ✓
+  sharp_costophrenic_angles                 normal=0.3916  virus=0.3668  bacteria=0.3347  → normal > virus ✓
+  normal_cardiac_silhouette                 normal=0.4410  virus=0.4031  bacteria=0.3810  → normal > virus ✓
+  no_focal_opacity                          normal=0.4270  virus=0.3866  bacteria=0.3547  → normal > virus ✓
+  symmetric_lung_aeration                   normal=0.4267  virus=0.3900  bacteria=0.3645  → normal > virus ✓
+
+interstitial_block (expected: virus > normal for all 3):
+  bilateral_interstitial_pattern            normal=0.4213  virus=0.4206  bacteria=0.3980  → virus < normal ✗
+  peribronchial_cuffing                     normal=0.3807  virus=0.3826  bacteria=0.3637  → virus > normal ✓
+  perihilar_infiltrates                     normal=0.4122  virus=0.4160  bacteria=0.4024  → virus > normal ✓
+
+Step 2 decision: anchor all correct=True, interstitial all correct=False
+→ Prompts discriminate per-class correctly: NO
+
+────────────────────────────────────────────────────────────
+STEP 3: Cross-image correlations (Explanation A confirmation)
+────────────────────────────────────────────────────────────
+
+Full train-pool mean |r| (anchor × interstitial, 12 pairs): 0.5001
+
+Within-normal-class correlations (n=1265 images):
+                                          bilateral_interstitial_patternperibronchial_cuffing       perihilar_infiltrates       
+  clear_lung_fields                         +0.3337                +0.5463                +0.1317              
+  sharp_costophrenic_angles                 +0.1418                +0.4085                -0.0319              
+  normal_cardiac_silhouette                 +0.3440                +0.0658                +0.2466              
+  no_focal_opacity                          +0.2767                +0.3746                +0.0529              
+  symmetric_lung_aeration                   +0.3379                +0.3455                +0.1411              
+
+Within-normal mean |r| over 12 pairs: 0.2519
+Within-normal mean signed r:          +0.2477
+Threshold (> 0.4 supports Explanation A): NO — within-class correlation is low
+
+────────────────────────────────────────────────────────────
+STEP 4: VERDICT
+────────────────────────────────────────────────────────────
+
+VERDICT: Explanation B (prompt discrimination failure)
+
+  One or more prompts in the normal_anchor_block or interstitial_block fail to
+  discriminate their intended target class: the expected per-class ordering
+  (normal > virus for anchor; virus > normal for interstitial) does not hold
+  universally (Step 2). The within-normal-class cross-block correlation is low
+  (0.252 mean |r|), suggesting the co-variance in the full train pool is driven
+  by class composition rather than a shared latent axis. This is analogous to
+  the HAM10000 v2 prompt leak. Implication: targeted prompt revision is needed
+  for the failing concepts before proceeding to NAM training.

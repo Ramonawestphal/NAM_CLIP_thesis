@@ -1,0 +1,41 @@
+{
+  "step": 28,
+  "lambda_s": 2.883368576136796,
+  "n_active": 20,
+  "val_balacc": 0.5164979373035431,
+  "val_auc": 0.8378712199591066,
+  "val_loss": 1.5863459035754204,
+  "train_loss": 1.1679977722624713,
+  "epochs_used": 15,
+  "time_sec": 18.89234709739685,
+  "just_eliminated": [
+    "irregular_pigmentation"
+  ],
+  "issue4_fix": "best_within_step_checkpoint_restored",
+  "norms": {
+    "asymmetry": 2.635436773300171,
+    "border_irregularity": 0.0,
+    "colour_variation": 0.7160895466804504,
+    "diameter_large": 3.6811749935150146,
+    "atypical_pigment_network": 2.0978775024414062,
+    "blue_white_veil": 2.6762139797210693,
+    "atypical_vascular_pattern": 1.5000311136245728,
+    "irregular_streaks": 0.0,
+    "irregular_pigmentation": 0.0,
+    "irregular_dots_globules": 2.736102819442749,
+    "regression_structures": 0.0,
+    "symmetric_uniform": 0.9260421395301819,
+    "reticular_network": 4.6366353034973145,
+    "arborizing_vessels": 2.933351993560791,
+    "blue_grey_ovoid_nests": 3.5102009773254395,
+    "ulceration": 3.803727626800537,
+    "scaly_surface": 4.512506008148193,
+    "strawberry_pattern": 2.3635244369506836,
+    "milia_like_cysts": 2.0945961475372314,
+    "comedo_like_openings": 3.58107328414917,
+    "cerebriform_surface": 3.8612959384918213,
+    "central_white_patch": 4.004114151000977,
+    "red_lacunae": 4.718477249145508,
+    "healthy_skin": 0.8600537180900574
+  }
+}

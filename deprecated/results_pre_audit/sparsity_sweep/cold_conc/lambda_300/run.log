@@ -1,0 +1,41 @@
+WARNING: CUDA not available — training on CPU. Expect ~15-25 min per seed.
+
+=================================================================
+Selected config 9 (multi-seed sweep winner)
+  hidden_dims  : [64, 32]
+  dropout      : 0.1
+  weight_decay : 1e-05
+  single-seed val balacc  : 0.6155
+  single-seed test balacc : 0.5353
+=================================================================
+
+Loading features...
+Loading splits...
+Carving validation set (GroupShuffleSplit 80/20 by lesion_id)...
+  train_final :  6429 images
+  val         :  1591 images
+  test        :  1995 images
+Standardising (z-score, fit on train_final)...
+  Class weights (balanced): {'akiec': np.float64(4.353), 'bcc': np.float64(2.766), 'bkl': np.float64(1.339), 'df': np.float64(12.085), 'mel': np.float64(1.262), 'nv': np.float64(0.213), 'vasc': np.float64(10.093)}
+
+=================================================================
+NAM v6 final training — 1 seeds
+  Winning config: hidden=[64, 32], dropout=0.1, wd=1e-05
+  lr=0.001 (ReduceLROnPlateau patience=5 factor=0.5)
+  batch=256  max_epochs=100  patience=15
+  class_weight='balanced'
+  concurvity_lambda=1.0  sparsity_lambda=300.0  proximal_sparsity=True
+=================================================================
+
+-- Seed 42 ---------------------------------------------
+  Epoch  10 | train_loss=1.9458 val_loss=1.9452 val_balacc=0.1429 lr=5.00e-04 | R_perp=0.0000 R_sparse=0.000000
+  Early stop at epoch 16 (best epoch 1, val_balacc=0.1429)
+  Feature selection: 0/24 concepts active (group_norm >= 0.0001)
+  Zeroed concepts  : ['asymmetry', 'border_irregularity', 'colour_variation', 'diameter_large', 'atypical_pigment_network', 'blue_white_veil', 'atypical_vascular_pattern', 'irregular_streaks', 'irregular_pigmentation', 'irregular_dots_globules', 'regression_structures', 'symmetric_uniform', 'reticular_network', 'arborizing_vessels', 'blue_grey_ovoid_nests', 'ulceration', 'scaly_surface', 'strawberry_pattern', 'milia_like_cysts', 'comedo_like_openings', 'cerebriform_surface', 'central_white_patch', 'red_lacunae', 'healthy_skin']
+  Test  bal_acc=0.1429  macro_f1=0.0136  AUC=0.5000  R_perp_val@best=0.0000  R_sparse@best=81.467670
+Traceback (most recent call last):
+  File "C:\Users\Ramona\.vscode\NAM_CLIP_thesis\scripts\train_nam_v6_final.py", line 517, in <module>
+    raise RuntimeError(
+    ...<3 lines>...
+    )
+RuntimeError: No seed reached val balanced accuracy >= 0.5 within the first 30 epochs. Check data and features. Use --skip_convergence_check to bypass (e.g. for short sanity-check runs).

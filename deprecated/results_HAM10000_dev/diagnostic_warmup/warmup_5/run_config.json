@@ -1,0 +1,26 @@
+{
+  "condition": "concurvity_only",
+  "hidden_dims": [
+    64,
+    32
+  ],
+  "dropout": 0.1,
+  "weight_decay": 0.0001,
+  "lr": 0.001,
+  "batch_size": 256,
+  "max_epochs": 100,
+  "patience": 15,
+  "concurvity_lambda": 3.0,
+  "sparsity_lambda": 0.0,
+  "proximal_sparsity": true,
+  "warmup_epochs": 5,
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "timestamp": "2026-06-05T13:08:48.280458+00:00",
+  "winner_json": "results/v7/architecture_search_cv/winner.json"
+}

@@ -1,0 +1,24 @@
+condition=sparsity_conc  seed=42  lambda_c=3.0
+dense_val_balacc=0.7331
+
+order   step      lambda_s  concept
+--------------------------------------------------
+    1     32    3.3731e+00  air_bronchograms
+    2     32    3.3731e+00  patchy_infiltrate
+    3     32    3.3731e+00  parapneumonic_effusion
+    4     32    3.3731e+00  bilateral_interstitial_pattern
+    5     33    3.5081e+00  perihilar_infiltrates
+    6     33    3.5081e+00  normal_cardiac_silhouette
+    7     34    3.6484e+00  dense_segmental_opacity
+    8     34    3.6484e+00  peribronchial_cuffing
+    9     35    3.7943e+00  sharp_costophrenic_angles
+   10     38    4.2681e+00  round_pneumonia
+   11     47    6.0748e+00  pleural_effusion
+   12     47    6.0748e+00  lobar_consolidation
+   13     74    1.7516e+01  symmetric_lung_aeration
+   14    100    4.8562e+01  silhouette_sign
+
+Never zeroed (3 concepts):
+  consolidation
+  focal_opacity
+  clear_lung_fields

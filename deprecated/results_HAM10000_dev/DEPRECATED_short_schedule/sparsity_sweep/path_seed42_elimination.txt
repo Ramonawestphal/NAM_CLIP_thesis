@@ -1,0 +1,31 @@
+seed=42
+dense_val_balacc=0.6016  dense_val_auc=0.8371
+
+order        lambda  concept
+-----------------------------------
+
+Never zeroed within lambda <= 1.00e+03:
+  asymmetry
+  border_irregularity
+  colour_variation
+  diameter_large
+  atypical_pigment_network
+  blue_white_veil
+  atypical_vascular_pattern
+  irregular_streaks
+  irregular_pigmentation
+  irregular_dots_globules
+  regression_structures
+  symmetric_uniform
+  reticular_network
+  arborizing_vessels
+  blue_grey_ovoid_nests
+  ulceration
+  scaly_surface
+  strawberry_pattern
+  milia_like_cysts
+  comedo_like_openings
+  cerebriform_surface
+  central_white_patch
+  red_lacunae
+  healthy_skin

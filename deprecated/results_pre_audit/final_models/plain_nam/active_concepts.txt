@@ -1,0 +1,37 @@
+# Config: plain_nam
+# Majority threshold: >= 3/5 seeds with group_norm > 1e-08
+
+ACTIVE:
+  asymmetry
+  border_irregularity
+  colour_variation
+  diameter_large
+  atypical_pigment_network
+  blue_white_veil
+  atypical_vascular_pattern
+  irregular_streaks
+  irregular_pigmentation
+  irregular_dots_globules
+  regression_structures
+  symmetric_uniform
+  reticular_network
+  arborizing_vessels
+  blue_grey_ovoid_nests
+  ulceration
+  scaly_surface
+  strawberry_pattern
+  milia_like_cysts
+  comedo_like_openings
+  cerebriform_surface
+  central_white_patch
+  red_lacunae
+  healthy_skin
+
+ELIMINATED:
+
+Per-seed active counts:
+  seed 42: 24/24
+  seed 43: 24/24
+  seed 44: 24/24
+  seed 45: 24/24
+  seed 46: 24/24

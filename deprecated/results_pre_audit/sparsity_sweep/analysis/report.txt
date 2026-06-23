@@ -1,0 +1,103 @@
+Sparsity sweep — plain-text report
+=================================================================
+
+Condition: sparsity only (λ_c=0)
+  Seeds loaded: 5
+
+  Phase transition lambda (first lambda where mean active <= k):
+    <= 20 active: 9.916e+00
+    <= 15 active: 1.643e+01
+    <= 10 active: 2.502e+01
+    <=  5 active: 3.406e+01
+    <=  1 active: 3.919e+01
+
+  Val AUC at key lambdas (mean ± std across seeds):
+    lambda =    0.1: AUC = 0.8599 ± 0.0015
+    lambda =    0.3: AUC = 0.8582 ± 0.0007
+    lambda =    1.0: AUC = 0.8600 ± 0.0019
+    lambda =    3.0: AUC = 0.8624 ± 0.0016
+    lambda =   10.0: AUC = 0.8388 ± 0.0017
+    lambda =   30.0: AUC = 0.7413 ± 0.0065
+    lambda =  100.0: AUC = 0.5000 ± 0.0000
+    lambda =  300.0: AUC = 0.5000 ± 0.0000
+
+-----------------------------------------------------------------
+
+Condition: sparsity+concurvity (λ_c=1.0)
+  Seeds loaded: 5
+
+  Phase transition lambda (first lambda where mean active <= k):
+    <= 20 active: 6.886e+00
+    <= 15 active: 9.375e+00
+    <= 10 active: 1.510e+01
+    <=  5 active: 3.312e+01
+    <=  1 active: 3.919e+01
+
+  Val AUC at key lambdas (mean ± std across seeds):
+    lambda =    0.1: AUC = 0.8492 ± 0.0021
+    lambda =    0.3: AUC = 0.8475 ± 0.0027
+    lambda =    1.0: AUC = 0.8494 ± 0.0021
+    lambda =    3.0: AUC = 0.8550 ± 0.0006
+    lambda =   10.0: AUC = 0.8296 ± 0.0038
+    lambda =   30.0: AUC = 0.7164 ± 0.0141
+    lambda =  100.0: AUC = 0.5000 ± 0.0000
+    lambda =  300.0: AUC = 0.5000 ± 0.0000
+
+-----------------------------------------------------------------
+
+Concept elimination order — sparsity only (λ_c=0):
+  order  concept                         mean_lam    n_zeroed
+  ------------------------------------------------------------
+      1  border_irregularity             7.367e+00   5
+      2  regression_structures           7.553e+00   5
+      3  irregular_dots_globules         8.504e+00   5
+      4  healthy_skin                    1.027e+01   5
+      5  strawberry_pattern              1.116e+01   5
+      6  symmetric_uniform               1.260e+01   5
+      7  irregular_streaks               1.326e+01   5
+      8  atypical_vascular_pattern       1.369e+01   5
+      9  blue_white_veil                 1.605e+01   5
+     10  irregular_pigmentation          1.846e+01   5
+     11  arborizing_vessels              2.188e+01   5
+     12  blue_grey_ovoid_nests           2.376e+01   5
+     13  ulceration                      2.507e+01   5
+     14  atypical_pigment_network        2.657e+01   5
+     15  cerebriform_surface             2.657e+01   5
+     16  diameter_large                  2.905e+01   5
+     17  milia_like_cysts                3.328e+01   5
+     18  comedo_like_openings            3.452e+01   5
+     19  red_lacunae                     3.514e+01   5
+     20  scaly_surface                   3.613e+01   5
+     21  central_white_patch             3.613e+01   5
+     22  colour_variation                3.713e+01   5
+     23  asymmetry                       3.827e+01   5
+     24  reticular_network               4.384e+01   5
+
+Concept elimination order — sparsity+concurvity (λ_c=1.0):
+  order  concept                         mean_lam    n_zeroed
+  ------------------------------------------------------------
+      1  regression_structures           5.374e+00   5
+      2  border_irregularity             5.591e+00   5
+      3  atypical_vascular_pattern       6.967e+00   5
+      4  irregular_dots_globules         7.082e+00   5
+      5  irregular_streaks               8.012e+00   5
+      6  healthy_skin                    8.723e+00   5
+      7  strawberry_pattern              1.016e+01   5
+      8  asymmetry                       1.068e+01   5
+      9  blue_white_veil                 1.116e+01   5
+     10  arborizing_vessels              1.223e+01   5
+     11  symmetric_uniform               1.415e+01   5
+     12  milia_like_cysts                1.431e+01   5
+     13  irregular_pigmentation          1.453e+01   5
+     14  cerebriform_surface             1.966e+01   5
+     15  ulceration                      2.173e+01   5
+     16  blue_grey_ovoid_nests           2.376e+01   5
+     17  atypical_pigment_network        2.435e+01   5
+     18  comedo_like_openings            2.468e+01   5
+     19  colour_variation                2.577e+01   5
+     20  red_lacunae                     3.315e+01   5
+     21  diameter_large                  3.626e+01   5
+     22  central_white_patch             3.713e+01   5
+     23  scaly_surface                   3.812e+01   5
+     24  reticular_network               3.886e+01   5
+

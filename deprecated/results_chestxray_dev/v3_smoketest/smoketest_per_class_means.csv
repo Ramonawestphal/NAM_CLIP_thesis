@@ -1,0 +1,13 @@
+candidate,class,mean
+bilateral_interstitial_pattern_a,normal,0.415510
+bilateral_interstitial_pattern_a,bacteria,0.403790
+bilateral_interstitial_pattern_a,virus,0.413165
+bilateral_interstitial_pattern_b,normal,0.393052
+bilateral_interstitial_pattern_b,bacteria,0.399289
+bilateral_interstitial_pattern_b,virus,0.402196
+hyperinflation_a,normal,0.406936
+hyperinflation_a,bacteria,0.411455
+hyperinflation_a,virus,0.412789
+hyperinflation_b,normal,0.432328
+hyperinflation_b,bacteria,0.406428
+hyperinflation_b,virus,0.424482
