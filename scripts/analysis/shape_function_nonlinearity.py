@@ -66,7 +66,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 
-from scripts.v7._common import (
+from scripts.HAM10000._common import (
     load_raw_data,
     make_fixed_val_split,
     set_all_seeds,

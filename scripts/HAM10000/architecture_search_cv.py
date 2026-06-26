@@ -76,7 +76,7 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
-from scripts.v7._common import (
+from scripts.HAM10000._common import (
     FEATURES_PATH, SPLITS_PATH, SWEEP_GRID,
     N_FEATURES, N_CLASSES,
     set_all_seeds, load_raw_data, standardize,

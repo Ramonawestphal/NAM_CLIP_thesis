@@ -42,7 +42,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 import pandas as pd
 
-from scripts.v7._common import write_step_flag
+from scripts.HAM10000._common import write_step_flag
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 SEED               = 42

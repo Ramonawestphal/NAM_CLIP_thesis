@@ -27,7 +27,7 @@ _ROOT = pathlib.Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.v7._common import (   # noqa: E402  (path set above)
+from scripts.HAM10000._common import (   # noqa: E402  (path set above)
     set_all_seeds,
     make_optimizer_scheduler,
     make_fixed_val_split,
