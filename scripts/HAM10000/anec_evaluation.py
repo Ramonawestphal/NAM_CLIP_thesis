@@ -51,7 +51,7 @@ _ROOT = pathlib.Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.v7._common import (
+from scripts.HAM10000._common import (
     FEATURES_PATH, SPLITS_PATH, N_FEATURES, N_CLASSES,
     load_raw_data, make_fixed_val_split, standardize, make_model,
 )

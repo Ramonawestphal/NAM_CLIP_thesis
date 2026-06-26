@@ -63,7 +63,7 @@ from sklearn.metrics import (
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 
-from scripts.v7._common import set_all_seeds, make_fixed_val_split
+from scripts.HAM10000._common import set_all_seeds, make_fixed_val_split
 from src.models.nam_multiclass import NAMMulticlass
 from src.models.concurvity import multiclass_concurvity
 from src.models.sparsity import feature_group_norms, apply_proximal_step

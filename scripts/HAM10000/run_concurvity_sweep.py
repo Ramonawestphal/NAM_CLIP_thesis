@@ -59,7 +59,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset
 
-from scripts.v7._common import (
+from scripts.HAM10000._common import (
     FEATURES_PATH, SPLITS_PATH, N_FEATURES, N_CLASSES,
     set_all_seeds, load_raw_data, make_fixed_val_split, standardize,
     class_weight_tensor, make_model, make_optimizer_scheduler,

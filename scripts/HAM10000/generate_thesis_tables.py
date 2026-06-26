@@ -40,7 +40,7 @@ if hasattr(sys.stdout, "reconfigure"):
 import numpy as np
 import pandas as pd
 
-from scripts.v7._common import write_step_flag
+from scripts.HAM10000._common import write_step_flag
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 SEEDS      = [42, 43, 44, 45, 46]

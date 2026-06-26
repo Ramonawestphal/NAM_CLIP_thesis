@@ -352,7 +352,9 @@ def main() -> None:
     if not DATA_ROOT.exists():
         sys.exit(
             f"ERROR: dataset root not found: {DATA_ROOT}\n"
-            "Download Kermany Chest X-ray to data/raw/chestxray_kermany/chest_xray/"
+            "Download the Kermany Chest X-ray dataset and place it at data/chest_xray/\n"
+            "Expected structure: data/chest_xray/{train,val,test}/{NORMAL,PNEUMONIA}/*.jpeg\n"
+            "Dataset available at: https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia"
         )
 
     SPLITS_DIR.mkdir(parents=True, exist_ok=True)

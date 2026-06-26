@@ -9,6 +9,8 @@ env/
 
 # Data and artifacts
 data/compas/*.csv
+# raw ProPublica export — committed for reproducibility
+!data/compas/compas-scores-two-years.csv
 data/chestxray/**
 data/ham10000/**
 !data/*/.gitkeep

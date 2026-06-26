@@ -53,7 +53,7 @@ from sklearn.metrics import balanced_accuracy_score
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
 
-from scripts.v7._common import (
+from scripts.HAM10000._common import (
     set_all_seeds,
     make_fixed_val_split,
 )
