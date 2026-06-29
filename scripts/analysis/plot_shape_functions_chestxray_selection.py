@@ -36,7 +36,6 @@ from scripts.analysis.plot_shape_functions import (
 
 CHESTXRAY_CONCEPTS: List[str] = [
     "focal_opacity",
-    "patchy_infiltrate",
     "parapneumonic_effusion",
     "peribronchial_cuffing",
     "pleural_effusion",
